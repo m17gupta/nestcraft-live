@@ -442,7 +442,7 @@ const Navbar = ({
   }, [isMobileMenuOpen]);
 
   const desktopNavClass = (href: string) =>
-    `group relative inline-flex items-center py-2 text-[14px] font-semibold tracking-[0.06em] transition-all duration-200 ${
+    `group relative inline-flex items-center py-2 text-[14px] font-medium transition-colors ${
       pathname === href ? "text-secondary" : "text-foreground hover:text-secondary"
     }`;
 
@@ -503,7 +503,7 @@ const Navbar = ({
                   );
                 })}
 
-                <div className="mx-1 h-5 w-px bg-border/70" />
+                {/* <div className="mx-1 h-5 w-px bg-border/70" /> */}
 
                 {navLinks.map((item) => (
                   <Link key={item.href} href={item.href} className={desktopNavClass(item.href)}>
@@ -650,14 +650,14 @@ const Navbar = ({
 
             <button
               onClick={toggleTheme}
-              className="hidden lg:inline-flex h-[38px] items-center gap-2 rounded-full border border-border bg-surface/70 px-3.5 text-[11px] font-extrabold uppercase tracking-wider text-foreground transition-all hover:border-secondary/50"
+              className="hidden lg:inline-flex py-2 px-2 cursor-pointer items-center gap-2 rounded-full border border-border bg-surface/70  text-[11px] font-extrabold uppercase tracking-wider text-foreground transition-all hover:border-secondary/50"
             >
               {theme === "dark" ? (
                 <Sun size={16} className="text-secondary" />
               ) : (
                 <Moon size={16} className="text-secondary" />
               )}
-              <span>{theme === "dark" ? "Light" : "Dark"}</span>
+              {/* <span>{theme === "dark" ? "Light" : "Dark"}</span> */}
             </button>
 
             <button

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Providers from '@/components/Providers';
-import SiteChrome from '@/components/SiteChrome';
+import LayoutWrapper from '@/components/LayoutWrapper';
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <body>
         <Providers>
-          <SiteChrome>{children}</SiteChrome>
+          <LayoutWrapper>{children}</LayoutWrapper>
         </Providers>
       </body>
     </html>

@@ -1,23 +1,11 @@
 import { NextResponse } from "next/server";
 import { getProductModel, getVariantModel } from "@/models";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { authenticateAdmin } from "@/lib/auth";
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_jwt_secret_change_me_in_prod";
 
-export async function authenticate() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('admin_token')?.value;
-  if (!token) return null;
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (e) {
-    return null;
-  }
-}
 
 export async function GET(req: Request) {
-  const auth = await authenticate();
+  const auth = await authenticateAdmin();
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(req.url);
@@ -43,7 +31,7 @@ export async function GET(req: Request) {
       return {
         ...p,
         variantCount: variants.length,
-        totalStock: variants.reduce((acc, v) => acc + (v.stock || 0), 0)
+        totalStock: variants.reduce((acc: number, v: any) => acc + (v.stock || 0), 0)
       };
     }));
 
@@ -54,7 +42,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const auth = await authenticate();
+  const auth = await authenticateAdmin();
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

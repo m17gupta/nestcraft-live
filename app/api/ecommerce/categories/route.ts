@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCategoryModel } from "@/models";
-import { authenticate } from "../products/route";
+import { authenticateAdmin } from "@/lib/auth";
 
 export async function GET(req: Request) {
-  const auth = await authenticate();
+  const auth = await authenticateAdmin();
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(req.url);
@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const auth = await authenticate();
+  const auth = await authenticateAdmin();
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

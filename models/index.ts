@@ -61,12 +61,12 @@ const orderSchema = new mongoose.Schema({
 
 export const getMasterModel = async <T = any>(modelName: string, schema: mongoose.Schema) => {
   const conn = await connectMasterDB();
-  return conn.models[modelName] || conn.model<T>(modelName, schema);
+  return conn.models[modelName] || conn.model(modelName, schema);
 };
 
 export const getTenantModel = async <T = any>(modelName: string, schema: mongoose.Schema) => {
   const conn = await connectTenantDB();
-  return conn.models[modelName] || conn.model<T>(modelName, schema);
+  return conn.models[modelName] || conn.model(modelName, schema);
 };
 
 export const getUserModel = () => getMasterModel("User", userSchema);
