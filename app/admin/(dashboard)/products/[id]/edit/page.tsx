@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { EditProductForm } from "@/components/products/EditProductForm";
 import { use } from "react";
 
-export default function EditProductPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  // Safe unwrapping for Next 13+
-  const resolvedParams = params instanceof Promise ? use(params) : params as { id: string };
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const productId = resolvedParams.id;
   
   const [product, setProduct] = useState<any>(null);
