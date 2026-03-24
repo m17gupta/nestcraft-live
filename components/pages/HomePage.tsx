@@ -62,7 +62,7 @@ const Hero = () => (
 );
 
 const USP = () => (
-  <section className="px-[5%] pb-[90px] mt-20">
+  <section className="px-[5%] pb-[60px] mt-20">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}

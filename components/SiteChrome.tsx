@@ -463,7 +463,7 @@ const Navbar = ({
                 <img
                   src="/assets/Image/nestcraft-logo.svg"
                   alt="NestCraft"
-                  className="h-8 w-auto sm:h-9 lg:h-13"
+                  className="h-12 w-auto sm:h-9 lg:h-14"
                 />
               </Link>
             </div>
@@ -965,7 +965,7 @@ const SearchOverlay = ({
 
 const Footer = () => (
   <footer className="border-t border-border bg-surface px-[5%] pb-10 pt-20">
-    <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+    <div className="mb-10 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
       <div className="space-y-6">
         <Link href="/" className="block">
           <img
@@ -1069,14 +1069,14 @@ const Footer = () => (
 
     <div className="huge-watermark">NESTCRAFT</div>
 
-    <div className="flex flex-col items-center justify-between gap-6 border-t border-border pt-10 md:flex-row">
+    <div className="md:flex text-center flex-col items-center justify-between gap-6 border-t border-border mt-10 pt-2 md:flex-row">
       <p className="py-2 text-[14px] font-medium transition-colors text-[#0b1610]">
         © 2026 NestCraft Interiors. All rights reserved.
       </p>
-      <div className="flex items-center gap-8">
+      <div className="flex items-center justify-center gap-8">
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="group relative inline-flex items-center  text-[14px] font-medium transition-colors text-[#0b1610] hover:text-[#98c45f]"
+          className="group relative text-center inline-flex items-center  text-[14px] font-medium transition-colors text-[#0b1610] hover:text-[#98c45f]"
         >
           Back to Top <ArrowUp size={14} />
         </button>
