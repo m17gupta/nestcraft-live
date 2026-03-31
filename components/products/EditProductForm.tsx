@@ -156,14 +156,13 @@ export function EditProductForm(props: EditProductFormProps) {
       category_ids: categoryIds,
       categoryIds,
       attributeSetIds,
-      attribute_set_ids: attributeSetIds,
       related_product_ids: relatedProductIds,
       template_key: templateKey,
       options,
       variants,
     };
     const res = await fetch(`/api/ecommerce/products/${props.id}`, {
-      method: "PATCH",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });

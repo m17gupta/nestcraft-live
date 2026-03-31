@@ -17,14 +17,16 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const response= await dispatch(loginThunk({email,password})).unwrap()
-    console.log("login", response);
-        if(response.status){
-          router.push("/admin");
-          router.refresh();
-        }else{
-          toast.error("Invalid Credentials");
-        }
+    try {
+      const response = await dispatch(loginThunk({ email, password })).unwrap();
+      console.log("login success:", response);
+      router.push("/admin");
+      router.refresh();
+    } catch (err: any) {
+      console.log("Login Error:", err);
+      setError(err || "Authentication failed");
+      toast.error(err || "Authentication failed");
+    }
     // try {
     //   const res = await fetch("/api/admin/login", {
     //     method: "POST",

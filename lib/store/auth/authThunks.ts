@@ -5,7 +5,7 @@ import { setCredentials, setLoading, setError } from './authSlice';
 
 export const loginThunk = createAsyncThunk(
   'auth/login',
-  async (credentials: any, { dispatch }) => {
+  async (credentials: any, { rejectWithValue }) => {
     console.log(credentials);
     try {
       const response: any = await fetch('/api/admin/login', {
@@ -16,20 +16,19 @@ export const loginThunk = createAsyncThunk(
         body: JSON.stringify(credentials),
       });
   
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Authentication failed');
-      }
       const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || 'Authentication failed');
+      }
+
       console.log("is response data", data);
       return {
         status: response.status,
         user: data.user,
-        
       }
     } catch (error: any) {
-      dispatch(setError(error.message));
-      throw error;
+      return rejectWithValue(error.message || 'An unexpected error occurred');
     }
   }
 );

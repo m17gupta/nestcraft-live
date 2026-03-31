@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EditProductForm } from "@/components/products/EditProductForm";
+import { SimpleProductForm } from "@/components/products/SimpleProductForm";
 import { use } from "react";
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -28,12 +28,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   if (!product) return <div className="p-8 text-primary">Product not found.</div>;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 pt-0 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Edit Product</h1>
         <p className="text-muted-foreground">Modify {product.name || 'this product'} in your inventory.</p>
       </div>
-      <EditProductForm {...product} id={productId} />
+      <SimpleProductForm initialData={product} />
     </div>
   );
 }
