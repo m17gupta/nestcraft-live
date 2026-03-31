@@ -5,7 +5,7 @@ import clientPromise from "@/lib/mongodb";
 export async function GET(req: NextRequest) {
     try {
         const client = await clientPromise;
-        const db = client.db("kalp_tenant_acadivate");
+        const db = client.db("kolp_tenant_acadivate");
         const pages = await db.collection("pages").find({}).toArray();
         return NextResponse.json({ success: true, pages });
     } catch (error) {

@@ -18,24 +18,39 @@ export async function POST(req: Request) {
 
 
     const client = await clientPromise;
-    const db = client.db(); // Uses the DB name from the MONGODB_URI or default
-    const users = db.collection("users");
-    // Assuming users are stored in the kalp_master DB in a "users" collection
-    const user = await users.findOne({ email });
+    const potentialDbs = ["kalp_master", "kalp_tenant_furni"];
+    let user = null;
+    let foundDb = "";
+
+    for (const dbName of potentialDbs) {
+      console.log(`Searching for user in database: ${dbName}`);
+      const db = client.db(dbName);
+      const users = db.collection("users");
+      user = await users.findOne({ email });
+      if (user) {
+        foundDb = dbName;
+        break;
+      }
+    }
 
     if (!user) {
+      console.log("User not found in any potential database.");
       return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 });
     }
 
-    // Usually we use bcrypt.compare(password, user.password)
-    // If the database has plain passwords or another hashing, this might need adjusting.
-    // For now, attempting bcrypt. If it fails due to plain text, we fallback to direct match (in development)
-    const isValid = await bcrypt.compare(password, user.password).catch(() => false);
+    console.log(`User found in: ${foundDb}`);
+    console.log("Comparing passwords...");
+    const isValid = await bcrypt.compare(password, user.password).catch((err) => {
+      console.error("Bcrypt error:", err);
+      return false;
+    });
 
     if (!isValid && password !== user.password) {
+      console.log("Password mismatch in:", foundDb);
       return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 });
     }
 
+    console.log("Login successful for:", user.email);
     const { password: userPassword, ...userWithoutPassword } = user;
 
     // Generate JWT

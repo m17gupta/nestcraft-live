@@ -5,9 +5,10 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { fetchProducts, selectAdminProducts, selectAdminProductsLoading } from "@/lib/store/features/adminProductsSlice";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash, Eye, ChevronDown, ChevronUp, Upload } from "lucide-react";
+import { Plus, Edit, Trash, Eye, ChevronDown, ChevronUp, Upload, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
@@ -20,18 +21,26 @@ export default function ProductsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    
     setDeletingId(id);
+    const toastId = toast.loading(`Deleting ${name}...`);
+
     try {
-      const res = await fetch(`/api/ecommerce/products/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/ecommerce/products/${id}`, { 
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+      
       if (res.ok) {
+        toast.success(`${name} deleted successfully`, { id: toastId });
         dispatch(fetchProducts());
       } else {
         const data = await res.json();
-        alert(`Delete failed: ${data.message || "Unknown error"}`);
+        toast.error(`Delete failed: ${data.error || "Unknown error"}`, { id: toastId });
       }
-    } catch {
-      alert("Delete failed. Please try again.");
+    } catch (err) {
+      toast.error("Network error. Please try again.", { id: toastId });
     } finally {
       setDeletingId(null);
     }
@@ -129,9 +138,24 @@ export default function ProductsPage() {
                 <React.Fragment key={prod._id}>
                   <TableRow className={expandedRow === prod._id ? "bg-muted/50" : ""}>
                     <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{prod.name}</span>
-                        <span className="text-xs text-muted-foreground">${prod.price}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-border bg-muted flex-shrink-0">
+                          {prod.primaryImageId || (prod.gallery && prod.gallery[0]) ? (
+                            <img 
+                              src={prod.primaryImageId || prod.gallery[0]} 
+                              alt={prod.name} 
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground/40">
+                               <ImageIcon size={20} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{prod.name}</span>
+                          <span className="text-xs text-muted-foreground">${prod.price}</span>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>{prod.sku}</TableCell>
