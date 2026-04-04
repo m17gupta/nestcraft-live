@@ -61,7 +61,7 @@ import { connectTenantDB } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
-function isHex(id: string) {
+export function isHex(id: string) {
   return /^[0-9a-fA-F]{24}$/.test(id);
 }
 

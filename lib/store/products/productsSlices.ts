@@ -141,8 +141,9 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.loading = false;
+
         // Transform API response to ProductFormState if needed
-        const p: ProductFormState = action.payload;
+        const p: ProductFormState = action.payload.data;
         state.currentProduct = {
           _id: p._id,
           name: p.name || "",
@@ -179,6 +180,11 @@ const productsSlice = createSlice({
           relatedProductIds: p.relatedProductIds || [],
           templateKey: p.templateKey || "product-split",
         };
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.currentProduct = null;
+        state.error = action.payload as string;
       })
       .addCase(saveProduct.pending, (state) => {
         state.saving = true;

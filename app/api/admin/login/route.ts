@@ -59,7 +59,6 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("Login successful for:", user.email);
     const { password: userPassword, ...userWithoutPassword } = user;
 
     // Generate JWT
@@ -86,7 +85,7 @@ export async function POST(req: Request) {
       success: true,
       user: { ...userWithoutPassword, _id: user._id.toString() },
     });
-    
+
     response.headers.set("Set-Cookie", cookieString);
     return response;
   } catch (error) {

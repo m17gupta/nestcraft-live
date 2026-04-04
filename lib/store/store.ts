@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import cartReducer from "./features/cartSlice";
+import cartReducer from "./cart/cartSlice";
 // import adminProductsReducer from "./features/adminProductsSlice";
 import adminAttributesReducer from "./features/adminAttributesSlice";
 import adminVariantsReducer from "./features/adminVariantsSlice";

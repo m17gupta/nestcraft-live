@@ -23,12 +23,12 @@ import {
   Users,
   Wrench,
   ShieldCheck,
-  ClipboardList
+  ClipboardList,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "@/lib/router";
 import { useAppSelector } from "@/lib/store/hooks";
-import { selectCartCount } from "@/lib/store/features/cartSlice";
+import { selectCartCount } from "@/lib/store/cart/cartSlice";
 import { products } from "@/data/products";
 
 // --- Types ---
@@ -42,7 +42,13 @@ type ShopMegaTab = {
   isLuxe?: boolean;
   isModular?: boolean;
   columns?: MegaMenuColumn[];
-  promo?: { img: string; href: string; title?: string; subtitle?: string; badge?: string };
+  promo?: {
+    img: string;
+    href: string;
+    title?: string;
+    subtitle?: string;
+    badge?: string;
+  };
 };
 
 // --- Exact Categories Data based on provided Images ---
@@ -338,9 +344,7 @@ const wsCategories: ShopMegaTab[] = [
           },
           {
             heading: "Bedding Essentials",
-            links: [
-              { title: "Bedsheets", href: "#" },
-            ],
+            links: [{ title: "Bedsheets", href: "#" }],
           },
         ],
       },
@@ -441,9 +445,7 @@ const wsCategories: ShopMegaTab[] = [
           },
           {
             heading: "Bundles & Sets",
-            links: [
-              { title: "Mattress & Bed Set", href: "#" },
-            ],
+            links: [{ title: "Mattress & Bed Set", href: "#" }],
           },
         ],
       },
@@ -509,7 +511,6 @@ const wsCategories: ShopMegaTab[] = [
             ],
           },
         ],
-        
       },
       {
         sections: [
@@ -558,7 +559,7 @@ const wsCategories: ShopMegaTab[] = [
         ],
       },
     ],
-     promo: {
+    promo: {
       img: "/assets/Image/dining.jpeg",
       href: "#",
     },
@@ -781,9 +782,7 @@ const wsCategories: ShopMegaTab[] = [
           },
           {
             heading: "Bathroom Accessories",
-            links: [
-              { title: "Soap Dispenser Sets", href: "#" },
-            ],
+            links: [{ title: "Soap Dispenser Sets", href: "#" }],
           },
           {
             heading: "Home Improvement",
@@ -799,9 +798,7 @@ const wsCategories: ShopMegaTab[] = [
         sections: [
           {
             heading: "Spiritual",
-            links: [
-              { title: "Home Temples", href: "#" },
-            ],
+            links: [{ title: "Home Temples", href: "#" }],
           },
           {
             heading: "Mirrors",
@@ -845,9 +842,7 @@ const wsCategories: ShopMegaTab[] = [
           },
           {
             heading: "Lights",
-            links: [
-              { title: "Hanging Lights", href: "#" },
-            ],
+            links: [{ title: "Hanging Lights", href: "#" }],
           },
           {
             heading: "Lamp Shades",
@@ -873,7 +868,7 @@ const wsCategories: ShopMegaTab[] = [
       },
     ],
     promo: {
-     img: "/assets/Image/decor.jpg",
+      img: "/assets/Image/decor.jpg",
       href: "#",
     },
   },
@@ -881,7 +876,7 @@ const wsCategories: ShopMegaTab[] = [
   {
     key: "modular",
     title: "Modular Kitchen & Wardrobe",
-    isModular: true, 
+    isModular: true,
   },
   // --- New: WS Luxe ---
   {
@@ -907,8 +902,8 @@ const wsCategories: ShopMegaTab[] = [
               { title: "Marble Dining Tables", href: "#" },
               { title: "Luxe Dining Chairs", href: "#" },
             ],
-          }
-        ]
+          },
+        ],
       },
       {
         sections: [
@@ -928,19 +923,27 @@ const wsCategories: ShopMegaTab[] = [
               { title: "Luxe Chandeliers", href: "#" },
               { title: "Designer Rugs", href: "#" },
             ],
-          }
-        ]
-      }
+          },
+        ],
+      },
     ],
     promo: {
       img: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=400",
       href: "#",
     },
-  }
+  },
 ];
 
 // --- 3-Tier Header Component ---
-const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleTheme: () => void; onSearchOpen: () => void; }) => {
+const Header = ({
+  theme,
+  toggleTheme,
+  onSearchOpen,
+}: {
+  theme: string;
+  toggleTheme: () => void;
+  onSearchOpen: () => void;
+}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeMegaTab, setActiveMegaTab] = useState<string | null>(null);
   const cartCount = useAppSelector(selectCartCount);
@@ -949,7 +952,10 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
 
   const activeTab = wsCategories.find((tab) => tab.key === activeMegaTab);
 
-  useEffect(() => { setIsMobileMenuOpen(false); setActiveMegaTab(null); }, [pathname]);
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setActiveMegaTab(null);
+  }, [pathname]);
 
   // Handle Scroll for Sticky logic
   useEffect(() => {
@@ -970,26 +976,53 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
         {/* TIER 1: Top Bar */}
         <div className="hidden lg:flex items-center justify-between px-4 sm:px-[5%] xl:px-[8%] py-2 bg-surface/40 border-b border-border text-[12px] text-muted">
           <div className="flex items-center gap-6 font-medium">
-            <Link href="/furniture" className="hover:text-secondary transition-colors text-secondary">Furniture</Link>
-            <Link href="/home-interiors" className="hover:text-secondary transition-colors">Home Interiors</Link>
-            <Link href="/bulk-order" className="hover:text-secondary transition-colors">Bulk Order</Link>
+            <Link
+              href="/furniture"
+              className="hover:text-secondary transition-colors text-secondary"
+            >
+              Furniture
+            </Link>
+            <Link
+              href="/home-interiors"
+              className="hover:text-secondary transition-colors"
+            >
+              Home Interiors
+            </Link>
+            <Link
+              href="/bulk-order"
+              className="hover:text-secondary transition-colors"
+            >
+              Bulk Order
+            </Link>
           </div>
-          
+
           {/* UPDATED: Top Bar Spacing (Tighter gaps as requested) */}
           <div className="flex items-center gap-3 sm:gap-4 font-medium">
-            <a href="tel:+91 9810159604" className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+            <a
+              href="tel:+91 9810159604"
+              className="flex items-center gap-1.5 hover:text-secondary transition-colors"
+            >
               <Phone size={13} /> +91-9810159604
             </a>
             <div className="w-px h-3.5 bg-border/80"></div>
-            <Link href="/franchise" className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+            <Link
+              href="/franchise"
+              className="flex items-center gap-1.5 hover:text-secondary transition-colors"
+            >
               <Building2 size={13} /> Become a Franchise
             </Link>
             <div className="w-px h-3.5 bg-border/80"></div>
-            <Link href="/track-order" className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+            <Link
+              href="/track-order"
+              className="flex items-center gap-1.5 hover:text-secondary transition-colors"
+            >
               <Truck size={13} /> Track Order
             </Link>
             <div className="w-px h-3.5 bg-border/80"></div>
-            <Link href="/help" className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+            <Link
+              href="/help"
+              className="flex items-center gap-1.5 hover:text-secondary transition-colors"
+            >
               <HelpCircle size={13} /> Help Center
             </Link>
           </div>
@@ -997,42 +1030,71 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
 
         {/* TIER 2: Middle Bar (Logo, Search, Icons) */}
         <div className="flex items-center justify-between px-4 sm:px-[5%] xl:px-[8%] py-4 bg-background">
-          <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 -ml-2 text-foreground">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="lg:hidden p-2 -ml-2 text-foreground"
+          >
             <Menu size={24} />
           </button>
 
           <div className="shrink-0 flex-1 lg:flex-none flex justify-center lg:justify-start">
             <Link href="/" className="block py-1">
               {/* UPDATED: Increased Logo Size */}
-              <img src="/assets/Image/nestcraft-logo.svg" alt="NestCraft" className="h-14 sm:h-18 w-auto object-contain" />
+              <img
+                src="/assets/Image/nestcraft-logo.svg"
+                alt="NestCraft"
+                className="h-14 sm:h-18 w-auto object-contain"
+              />
             </Link>
           </div>
 
-          <div className="hidden lg:flex flex-1 max-w-2xl mx-12 relative group cursor-text" onClick={onSearchOpen}>
+          <div
+            className="hidden lg:flex flex-1 max-w-2xl mx-12 relative group cursor-text"
+            onClick={onSearchOpen}
+          >
             <div className="w-full flex items-center h-12 rounded-sm border border-border bg-surface px-4 text-muted group-hover:border-secondary transition-colors">
-              <span className="text-[14px]">Search Products, Color & More...</span>
+              <span className="text-[14px]">
+                Search Products, Color & More...
+              </span>
               <Search size={20} className="absolute right-4 text-muted" />
             </div>
           </div>
 
           <div className="flex items-center gap-4 sm:gap-8 shrink-0">
-            <button onClick={toggleTheme} className="hidden sm:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors">
+            <button
+              onClick={toggleTheme}
+              className="hidden sm:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors"
+            >
               {theme === "dark" ? <Sun size={22} /> : <Moon size={22} />}
-              <span className="text-[11px] font-medium hidden lg:block">Theme</span>
+              <span className="text-[11px] font-medium hidden lg:block">
+                Theme
+              </span>
             </button>
-            <Link href="/stores" className="hidden lg:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors">
+            <Link
+              href="/stores"
+              className="hidden lg:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors"
+            >
               <Store size={22} />
               <span className="text-[11px] font-medium">Stores</span>
             </Link>
-            <Link href="/profile" className="hidden sm:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors">
+            <Link
+              href="/profile"
+              className="hidden sm:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors"
+            >
               <User size={22} />
               <span className="text-[11px] font-medium">Profile</span>
             </Link>
-            <Link href="/wishlist" className="hidden sm:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors">
+            <Link
+              href="/wishlist"
+              className="hidden sm:flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors"
+            >
               <Heart size={22} />
               <span className="text-[11px] font-medium">Wishlist (0)</span>
             </Link>
-            <Link href="/cart" className="flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors relative">
+            <Link
+              href="/cart"
+              className="flex flex-col items-center gap-1 text-muted hover:text-secondary transition-colors relative"
+            >
               <div className="relative">
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
@@ -1041,19 +1103,21 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
                   </span>
                 )}
               </div>
-              <span className="text-[11px] font-medium hidden lg:block">Cart ({cartCount})</span>
+              <span className="text-[11px] font-medium hidden lg:block">
+                Cart ({cartCount})
+              </span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* TIER 3: Category Bar - STICKY logic applied here */}
-      <div 
+      <div
         className={`hidden lg:block w-full bg-background border-y border-border shadow-sm z-[1150] transition-all duration-300 ${
-          isScrolled ? 'fixed top-0 left-0' : 'relative'
+          isScrolled ? "fixed top-0 left-0" : "relative"
         }`}
       >
-        <div 
+        <div
           className="mx-auto px-4 sm:px-[5%] xl:px-[8%] flex items-center justify-between"
           onMouseLeave={() => setActiveMegaTab(null)}
         >
@@ -1064,11 +1128,17 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
                 key={tab.key}
                 onMouseEnter={() => setActiveMegaTab(tab.key)}
                 className={`group relative py-4 text-[14px] font-medium transition-colors ${
-                  tab.isLuxe ? "text-black" : isActive ? "text-secondary" : "text-foreground hover:text-secondary"
+                  tab.isLuxe
+                    ? "text-black"
+                    : isActive
+                      ? "text-secondary"
+                      : "text-foreground hover:text-secondary"
                 }`}
               >
                 <span>{tab.title}</span>
-                <span className={`absolute bottom-0 left-0 h-[3px] bg-secondary transition-all duration-200 ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                <span
+                  className={`absolute bottom-0 left-0 h-[3px] bg-secondary transition-all duration-200 ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}
+                />
               </button>
             );
           })}
@@ -1085,59 +1155,89 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
                 onMouseEnter={() => setActiveMegaTab(activeTab.key)}
               >
                 <div className="mx-auto px-4 sm:px-[5%] xl:px-[8%] py-8">
-                  
                   {/* UPDATED: Handle Modular Kitchen Special Layout */}
                   {activeTab.isModular ? (
                     <div className="flex flex-col lg:flex-row gap-8 xl:gap-16 justify-between">
                       {/* Left Info Panel */}
                       <div className="flex-1 max-w-md pt-2">
                         <h3 className="text-2xl sm:text-3xl text-foreground font-light mb-12 leading-snug">
-                          Transform your home's style with our innovative <span className="font-bold">Design</span>
+                          Transform your home's style with our innovative{" "}
+                          <span className="font-bold">Design</span>
                         </h3>
-                        
+
                         <div className="grid grid-cols-4 gap-4 text-center">
                           <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full flex items-center justify-center text-secondary mb-3">
                               <Users strokeWidth={1.5} size={32} />
                             </div>
-                            <span className="text-[11px] font-medium text-muted px-2">20,000+ happy customers</span>
+                            <span className="text-[11px] font-medium text-muted px-2">
+                              20,000+ happy customers
+                            </span>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full flex items-center justify-center text-secondary mb-3">
                               <Wrench strokeWidth={1.5} size={32} />
                             </div>
-                            <span className="text-[11px] font-medium text-muted px-2">Branded Hardware and Materials</span>
+                            <span className="text-[11px] font-medium text-muted px-2">
+                              Branded Hardware and Materials
+                            </span>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full flex items-center justify-center text-secondary mb-3">
                               <ShieldCheck strokeWidth={1.5} size={32} />
                             </div>
-                            <span className="text-[11px] font-medium text-muted px-2">Up to 10-years* material warranty</span>
+                            <span className="text-[11px] font-medium text-muted px-2">
+                              Up to 10-years* material warranty
+                            </span>
                           </div>
                           <div className="flex flex-col items-center">
                             <div className="h-12 w-12 rounded-full flex items-center justify-center text-secondary mb-3">
                               <ClipboardList strokeWidth={1.5} size={32} />
                             </div>
-                            <span className="text-[11px] font-medium text-muted px-2">Stringent Quality Checks</span>
+                            <span className="text-[11px] font-medium text-muted px-2">
+                              Stringent Quality Checks
+                            </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Right Promo Images */}
                       <div className="flex gap-6 flex-1">
-                        <Link href="/modular-kitchen" className="group block flex-1">
+                        <Link
+                          href="/modular-kitchen"
+                          className="group block flex-1"
+                        >
                           <div className="rounded-lg overflow-hidden bg-surface mb-3 h-[240px]">
-                            <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=800" alt="Modular Kitchen" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <img
+                              src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=800"
+                              alt="Modular Kitchen"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
                           </div>
-                          <h4 className="text-center font-medium text-foreground text-lg">Modular Kitchen</h4>
-                          <p className="text-center text-muted text-sm mt-1">Starting From ₹1,49,999</p>
+                          <h4 className="text-center font-medium text-foreground text-lg">
+                            Modular Kitchen
+                          </h4>
+                          <p className="text-center text-muted text-sm mt-1">
+                            Starting From ₹1,49,999
+                          </p>
                         </Link>
-                        <Link href="/modular-wardrobe" className="group block flex-1">
+                        <Link
+                          href="/modular-wardrobe"
+                          className="group block flex-1"
+                        >
                           <div className="rounded-lg overflow-hidden bg-surface mb-3 h-[240px]">
-                            <img src="https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?auto=format&fit=crop&q=80&w=800" alt="Modular Wardrobe" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <img
+                              src="https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?auto=format&fit=crop&q=80&w=800"
+                              alt="Modular Wardrobe"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
                           </div>
-                          <h4 className="text-center font-medium text-foreground text-lg">Modular Wardrobe</h4>
-                          <p className="text-center text-muted text-sm mt-1">Starting From ₹49,999</p>
+                          <h4 className="text-center font-medium text-foreground text-lg">
+                            Modular Wardrobe
+                          </h4>
+                          <p className="text-center text-muted text-sm mt-1">
+                            Starting From ₹49,999
+                          </p>
                         </Link>
                       </div>
                     </div>
@@ -1146,7 +1246,10 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
                     <div className="flex gap-8 justify-between">
                       <div className="flex gap-12 flex-1 flex-wrap">
                         {activeTab.columns?.map((col, colIndex) => (
-                          <div key={colIndex} className="flex flex-col gap-8 min-w-[160px]">
+                          <div
+                            key={colIndex}
+                            className="flex flex-col gap-8 min-w-[160px]"
+                          >
                             {col.sections.map((section, secIndex) => (
                               <div key={secIndex}>
                                 <h4 className="mb-3 text-[14px] font-bold text-foreground">
@@ -1156,7 +1259,10 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
                                 <ul className="space-y-[3px]">
                                   {section.links.map((link) => (
                                     <li key={link.title}>
-                                      <Link href={link.href} className="text-[13px] text-muted transition-colors hover:text-secondary">
+                                      <Link
+                                        href={link.href}
+                                        className="text-[13px] text-muted transition-colors hover:text-secondary"
+                                      >
                                         {link.title}
                                       </Link>
                                     </li>
@@ -1170,7 +1276,10 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
 
                       {activeTab.promo && (
                         <div className="w-[300px] shrink-0 border-l border-border pl-8 hidden xl:block">
-                          <Link href={activeTab.promo.href} className="block overflow-hidden rounded-md bg-surface group relative h-[350px]">
+                          <Link
+                            href={activeTab.promo.href}
+                            className="block overflow-hidden rounded-md bg-surface group relative h-[350px]"
+                          >
                             <img
                               src={activeTab.promo.img}
                               alt="Category Promo"
@@ -1195,16 +1304,41 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-black/50 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
-            <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "tween", duration: 0.3 }} className="fixed left-0 top-0 z-[2001] h-full w-[min(85vw,350px)] overflow-y-auto bg-background px-5 py-6 shadow-2xl lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[2000] bg-black/50 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed left-0 top-0 z-[2001] h-full w-[min(85vw,350px)] overflow-y-auto bg-background px-5 py-6 shadow-2xl lg:hidden"
+            >
               <div className="mb-6 flex items-center justify-between">
-                <img src="/assets/Image/nestcraft-logo.svg" alt="NestCraft" className="h-10 w-auto" />
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-muted"><X size={24} /></button>
+                <img
+                  src="/assets/Image/nestcraft-logo.svg"
+                  alt="NestCraft"
+                  className="h-10 w-auto"
+                />
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 text-muted"
+                >
+                  <X size={24} />
+                </button>
               </div>
               <div className="space-y-4">
                 {wsCategories.map((tab) => (
                   <div key={tab.key} className="border-b border-border pb-3">
-                    <Link href={`/category/${tab.key}`} onClick={() => setIsMobileMenuOpen(false)} className={`block text-lg font-semibold ${tab.isLuxe ? "text-black" : "text-foreground"}`}>
+                    <Link
+                      href={`/category/${tab.key}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block text-lg font-semibold ${tab.isLuxe ? "text-black" : "text-foreground"}`}
+                    >
                       {tab.title}
                     </Link>
                   </div>
@@ -1219,26 +1353,65 @@ const Header = ({ theme, toggleTheme, onSearchOpen }: { theme: string; toggleThe
 };
 
 // --- Search Overlay & Footer & SiteChrome (unchanged mostly) ---
-const SearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void; }) => {
+const SearchOverlay = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if (isOpen && inputRef.current) inputRef.current.focus(); }, [isOpen]);
+  useEffect(() => {
+    if (isOpen && inputRef.current) inputRef.current.focus();
+  }, [isOpen]);
 
-  const filteredProducts = query.length > 1 ? products.filter((p) => p.title.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase())) : [];
+  const filteredProducts =
+    query.length > 1
+      ? products.filter(
+          (p) =>
+            p.title.toLowerCase().includes(query.toLowerCase()) ||
+            p.category.toLowerCase().includes(query.toLowerCase()),
+        )
+      : [];
 
-  const handleSelect = (id: number) => { navigate(`/product/${id}`); onClose(); setQuery(""); };
+  const handleSelect = (id: number) => {
+    navigate(`/product/${id}`);
+    onClose();
+    setQuery("");
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[3000] flex flex-col items-center bg-background/95 px-4 pt-24 backdrop-blur-xl sm:px-[5%] sm:pt-32">
-          <button onClick={onClose} className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-border transition-all hover:bg-surface sm:right-10 sm:top-10"><X size={22} /></button>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[3000] flex flex-col items-center bg-background/95 px-4 pt-24 backdrop-blur-xl sm:px-[5%] sm:pt-32"
+        >
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-border transition-all hover:bg-surface sm:right-10 sm:top-10"
+          >
+            <X size={22} />
+          </button>
           <div className="w-full max-w-3xl">
             <div className="relative mb-10 sm:mb-12">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted sm:left-6" size={22} />
-              <input ref={inputRef} type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search for furniture..." className="h-16 w-full rounded-[24px] border border-border bg-surface pl-12 pr-4 text-lg font-bold outline-none transition-all placeholder:text-muted/30 focus:border-secondary sm:h-20 sm:pl-16 sm:pr-8 sm:text-2xl" />
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted sm:left-6"
+                size={22}
+              />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search for furniture..."
+                className="h-16 w-full rounded-[24px] border border-border bg-surface pl-12 pr-4 text-lg font-bold outline-none transition-all placeholder:text-muted/30 focus:border-secondary sm:h-20 sm:pl-16 sm:pr-8 sm:text-2xl"
+              />
             </div>
           </div>
         </motion.div>
@@ -1269,9 +1442,21 @@ const Footer = () => (
 
         <div className="flex gap-4">
           {[
-            { name: "Instagram", icon: Instagram, url: "https://www.instagram.com/nestcraft_furniture/" },
-            { name: "Facebook", icon: Facebook, url: "https://www.facebook.com/profile.php?id=61581337593979" },
-            { name: "Twitter", icon: Twitter, url: "https://x.com/NestCFurniture" },
+            {
+              name: "Instagram",
+              icon: Instagram,
+              url: "https://www.instagram.com/nestcraft_furniture/",
+            },
+            {
+              name: "Facebook",
+              icon: Facebook,
+              url: "https://www.facebook.com/profile.php?id=61581337593979",
+            },
+            {
+              name: "Twitter",
+              icon: Twitter,
+              url: "https://x.com/NestCFurniture",
+            },
             { name: "Youtube", icon: Youtube, url: "#" },
           ].map((social) => (
             <a
@@ -1291,18 +1476,22 @@ const Footer = () => (
           Shop
         </h4>
         <ul className="space-y-4">
-          {["Living Room", "Bedroom", "Dining Room", "Home Office", "Decor"].map(
-            (item) => (
-              <li key={item}>
-                <Link
-                  href="/shop"
-                  className="font-bold text-muted transition-colors hover:text-secondary"
-                >
-                  {item}
-                </Link>
-              </li>
-            )
-          )}
+          {[
+            "Living Room",
+            "Bedroom",
+            "Dining Room",
+            "Home Office",
+            "Decor",
+          ].map((item) => (
+            <li key={item}>
+              <Link
+                href="/shop"
+                className="font-bold text-muted transition-colors hover:text-secondary"
+              >
+                {item}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -1392,28 +1581,53 @@ const Footer = () => (
   </footer>
 );
 
-export default function SiteChrome({ children }: { children: React.ReactNode }) {
+export default function SiteChrome({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [theme, setTheme] = useState("light");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { pathname } = useLocation();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) { setTheme(savedTheme); document.documentElement.setAttribute("data-theme", savedTheme); } 
-    else { const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches; const initialTheme = prefersDark ? "dark" : "light"; setTheme(initialTheme); document.documentElement.setAttribute("data-theme", initialTheme); }
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    } else {
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      const initialTheme = prefersDark ? "dark" : "light";
+      setTheme(initialTheme);
+      document.documentElement.setAttribute("data-theme", initialTheme);
+    }
   }, []);
 
-  useEffect(() => { window.scrollTo(0, 0); setIsSearchOpen(false); }, [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setIsSearchOpen(false);
+  }, [pathname]);
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme); document.documentElement.setAttribute("data-theme", newTheme); localStorage.setItem("theme", newTheme);
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Header theme={theme} toggleTheme={toggleTheme} onSearchOpen={() => setIsSearchOpen(true)} />
-      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <Header
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onSearchOpen={() => setIsSearchOpen(true)}
+      />
+      <SearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
       <main className="flex-1 w-full">{children}</main>
       <Footer />
     </div>

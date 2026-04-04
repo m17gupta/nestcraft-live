@@ -39,3 +39,8 @@ export const getPageModel = async () => {
   const db = await connectTenantDB();
   return db.collection("pages");
 };
+
+export const getCartModel = async () => {
+  const db = await connectTenantDB();
+  return db.collection("carts");
+};

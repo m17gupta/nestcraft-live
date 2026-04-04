@@ -520,7 +520,7 @@ import {
 } from "lucide-react";
 import { products, categories } from "../../data/products";
 import { useAppDispatch } from "../../lib/store/hooks";
-import { addToCart } from "../../lib/store/features/cartSlice";
+import { addToCart } from "../../lib/store/cart/cartSlice";
 import { RootState } from "@/lib/store/store";
 import { useSelector } from "react-redux";
 import { AnnotatorPlugin } from "../annotationPlugin/AnnotatorPlugin";
