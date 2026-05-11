@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { Terminal, FileSpreadsheet, Eye, ArrowRight, Package, User as UserIcon, Calendar } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { fetchSubmissions, fetchForms } from "@/lib/store/forms/formsThunk";
-import { fetchProducts } from "@/lib/store/products/productsThunk";
+
+
 import { RootState } from "@/lib/store/store";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,10 +18,12 @@ import {
 
 export default function FormSubmissionsPage() {
   const dispatch = useAppDispatch();
-  const { submissions, allForms, loading } = useAppSelector((state: RootState) => state.adminForms);
+  const {  allForms,isLoading } = useAppSelector((state: RootState) => state.adminForms);
   const { allProducts } = useAppSelector((state: RootState) => state.adminProducts);
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
 
+
+ 
   const getFormName = (id: string) => allForms.find((f: any) => f._id === id)?.name || "UNKNOWN FORM";
   const getProductName = (id: string) => allProducts.find((p: any) => p._id === id)?.name || "DIRECT ENTRY";
 
@@ -37,14 +39,14 @@ export default function FormSubmissionsPage() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="h-[40vh] flex flex-col items-center justify-center gap-6">
           <div className="h-12 w-12 border-4 border-slate-100 border-t-primary rounded-none animate-spin shadow-lg shadow-primary/10" />
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
             Loading Submissions...
           </span>
         </div>
-      ) : submissions.length === 0 ? (
+      ) : allForms.length === 0 ? (
         <div className="h-[50vh] border-2 border-dashed border-slate-200 rounded-none flex flex-col items-center justify-center gap-8 bg-white shadow-inner animate-in fade-in zoom-in-95 duration-700">
            <div className="h-20 w-20 rounded-none bg-slate-50 flex items-center justify-center text-slate-200 shadow-inner">
             <FileSpreadsheet size={40} />
@@ -60,7 +62,7 @@ export default function FormSubmissionsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
-          {submissions.map((sub: any) => (
+          {allForms.map((sub: any) => (
             <div 
               key={sub._id}
               className="bg-white border border-slate-100 p-8 rounded-none shadow-sm hover:border-primary/20 transition-all duration-500 flex flex-col md:flex-row md:items-center justify-between gap-8 group relative overflow-hidden"

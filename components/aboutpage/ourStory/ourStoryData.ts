@@ -23,19 +23,31 @@ export const defaultOurStoryData = {
   content: [
     {
       id: "story-1",
-      text: { en: "Sustainably sourced premium materials", hi: "स्थायी रूप से प्राप्त प्रीमियम सामग्री" },
+      type: "item",
+      props: {
+        text: { en: "Sustainably sourced premium materials", hi: "स्थायी रूप से प्राप्त प्रीमियम सामग्री" },
+      },
     },
     {
       id: "story-2",
-      text: { en: "Artisanal craftsmanship in every detail", hi: "हर विवरण में शिल्प कौशल" },
+      type: "item",
+      props: {
+        text: { en: "Artisanal craftsmanship in every detail", hi: "हर विवरण में शिल्प कौशल" },
+      },
     },
     {
       id: "story-3",
-      text: { en: "Timeless forms with everyday comfort", hi: "रोजमर्रा के आराम के साथ कालातीत रूप" },
+      type: "item",
+      props: {
+        text: { en: "Timeless forms with everyday comfort", hi: "रोजमर्रा के आराम के साथ कालातीत रूप" },
+      },
     },
     {
       id: "story-4",
-      text: { en: "Quality-focused production and support", hi: "गुणवत्ता-केंद्रित उत्पादन और समर्थन" },
+      type: "item",
+      props: {
+        text: { en: "Quality-focused production and support", hi: "गुणवत्ता-केंद्रित उत्पादन और समर्थन" },
+      },
     },
   ],
 };

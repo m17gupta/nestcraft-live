@@ -29,11 +29,11 @@ export default function AdminDashboard() {
     orders: 0,
     attributes: 0,
   });
-  const { nestCraftUser, isLoading } = useSelector(
+  const { user:nestCraftUser, isLoading } = useSelector(
     (state: RootState) => state.auth,
   );
 
-  console.log(nestCraftUser);
+
 
   useEffect(() => {
     const fetchStats = async () => {

@@ -22,6 +22,7 @@ const DesignPhilosophy = () => {
     return currentPages.content?.find((s: any) => s?.adminTitle === "Design Philosophy");
   }, [currentPages]);
 
+
   // 3. Data Merging
   const p = (section as any)?.props || defaultDesignPhilosophyData.props;
   const content = (section as any)?.content || defaultDesignPhilosophyData.content;
@@ -52,8 +53,16 @@ const DesignPhilosophy = () => {
               }`}
             >
               <img
-                src={item.image}
-                alt={item.alt?.[lang] || item.alt?.en || item.alt || ""}
+                src={item.props?.image || item.image}
+                alt={
+                  item.props?.alt?.[lang] ||
+                  item.props?.alt?.en ||
+                  item.props?.alt ||
+                  item.alt?.[lang] ||
+                  item.alt?.en ||
+                  item.alt ||
+                  ""
+                }
                 className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
               />
             </div>

@@ -679,8 +679,8 @@ const CategoryPage = () => {
 
                 {/* Price slider */}
                 <PriceRangeFilter />
-
-                {cmsFilters.map((filter: any) => {
+{/* 
+                {cmsFilters && cmsFilters?.map((filter: any) => {
                   const filterType = filter.props?.filterType;
                   return (
                     <AccordionSection 
@@ -769,7 +769,7 @@ const CategoryPage = () => {
                       )}
                     </AccordionSection>
                   );
-                })}
+                })} */}
               </div>
             </aside>
 

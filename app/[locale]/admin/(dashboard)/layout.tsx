@@ -69,7 +69,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <>
+    <StoreProvider>
       <Toaster />
       <BrandingInitializer initialConfig={tenantRegistry} />
       <GetUser user={user} />
@@ -125,6 +125,6 @@ export default async function DashboardLayout({
           </div>
         </SidebarInset>
       </SidebarProvider>
-    </>
+    </StoreProvider>
   );
 }

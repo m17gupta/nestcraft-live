@@ -144,7 +144,6 @@ function CustomersPageContent() {
           <div className="flex items-center gap-4 text-primary/60">
             <User size={16} strokeWidth={2.5} />
             <span className="text-[10px] font-black uppercase tracking-[0.4em]">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">
               Customer Relation Management
             </span>
           </div>

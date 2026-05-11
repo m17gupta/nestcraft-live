@@ -22,13 +22,19 @@ export const defaultDesignPhilosophyData = {
   content: [
     {
       id: "img-1",
-      image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=1200",
-      alt: { en: "Interior setup", hi: "इंटीरियर सेटअप" },
+      type: "item",
+      props: {
+        image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=1200",
+        alt: { en: "Interior setup", hi: "इंटीरियर सेटअप" },
+      },
     },
     {
       id: "img-2",
-      image: "https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&q=80&w=1200",
-      alt: { en: "Furniture detail", hi: "फर्नीचर विवरण" },
+      type: "item",
+      props: {
+        image: "https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&q=80&w=1200",
+        alt: { en: "Furniture detail", hi: "फर्नीचर विवरण" },
+      },
     },
   ],
   tags: [

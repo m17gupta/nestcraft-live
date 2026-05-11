@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { fetchPagesThunk, deletePageThunk } from "@/lib/store/pages/pageThunk";
 import {
@@ -31,6 +31,8 @@ import { Page } from "@/lib/store/pages/pageType";
 function PagesPageContent() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const params = useParams();
+  const locale = (params?.locale as string) || "en";
   const { allPages: pages, isLoading: loading } = useSelector(
     (state: RootState) => state.pages
   );
@@ -146,7 +148,7 @@ function PagesPageContent() {
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="font-black text-slate-900 text-[13px] uppercase tracking-widest group-hover:text-primary transition-colors">
-                          {page.title}
+                          {(page?.title as any)?.[locale] || page?.title?.en || "Untitled Page"}
                         </span>
                         <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                           <Globe size={12} className="text-primary/60" strokeWidth={2.5} />
@@ -194,7 +196,7 @@ function PagesPageContent() {
                         disabled={deletingId === page._id}
                         onClick={() =>
                           page._id &&
-                          handleDelete(page._id, page.title || "Untitled")
+                          handleDelete(page._id, page.title?.en || "Untitled")
                         }
                       >
                         <Trash className="h-5 w-5" strokeWidth={2.5} />

@@ -19,9 +19,8 @@ const StatsSection = () => {
   // 2. CMS Data Fetching
   const section = useMemo(() => {
     if (!currentPages) return null;
-    return currentPages.content?.find((s: any) => s?.adminTitle === "Stats Counter");
+    return currentPages.content?.find((s: any) => s?.adminTitle === "Stats Section");
   }, [currentPages]);
-
   // 3. Data Merging
   const p = (section as any)?.props || defaultStatsSectionData.props;
   const content = (section as any)?.content || defaultStatsSectionData.content;
@@ -45,10 +44,16 @@ const StatsSection = () => {
               className="flex flex-col items-center justify-center py-10 px-6 rounded-[24px] border border-gray-100 bg-white transition-all hover:shadow-lg hover:shadow-gray-100/50"
             >
               <span className="text-4xl md:text-5xl font-bold text-black mb-3 font-heading">
-                {item.value}
+                {item.props?.value || item.value}
               </span>
               <span className="text-[11px] md:text-[12px] font-black uppercase tracking-[2px] text-gray-500 text-center">
-                {item.label?.[lang] || item.label?.en || item.label || ""}
+                {item.props?.label?.[lang] ||
+                  item.props?.label?.en ||
+                  item.props?.label ||
+                  item.label?.[lang] ||
+                  item.label?.en ||
+                  item.label ||
+                  ""}
               </span>
             </motion.div>
           ))}

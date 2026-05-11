@@ -172,7 +172,6 @@ export default function AccountSettingsPage() {
 
           <div className="flex-1 flex flex-col gap-3">
             <p className="text-3xl font-heading font-black text-slate-900 uppercase tracking-tight leading-none group-hover:text-primary transition-colors">
-            <p className="text-3xl font-heading font-black text-slate-900 uppercase tracking-tight leading-none group-hover:text-primary transition-colors">
               {profile.name}
             </p>
             <p className="text-[12px] font-bold text-slate-400 tracking-[0.2em] uppercase">

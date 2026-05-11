@@ -7,13 +7,18 @@ export interface PageBlock {
   columns?: any[][]; // New field for multi-column mapping
 }
 
+export interface LocalizedText {
+  en: string;
+  hi: string;
+}
+
 export interface Page {
   _id?: string;
-  title: string;
+  title: LocalizedText;
   slug: string;
   content: PageBlock[];
-  metaTitle?: string;
-  metaDescription?: string;
+  metaTitle?: LocalizedText;
+  metaDescription?: LocalizedText;
   isPublished: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;

@@ -19,7 +19,7 @@ const ContactPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
       const {user}= useSelector((state:RootState)=>state.auth)
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     

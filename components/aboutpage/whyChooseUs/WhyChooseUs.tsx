@@ -30,6 +30,7 @@ const WhyChooseUs = () => {
     return currentPages.content?.find((s: any) => s?.adminTitle === "Why Choose Us");
   }, [currentPages]);
 
+
   // 3. Data Merging
   const p = (section as any)?.props || defaultWhyChooseUsData.props;
   const content = (section as any)?.content || defaultWhyChooseUsData.content;
@@ -72,7 +73,7 @@ const WhyChooseUs = () => {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {content.map((item: any, idx: number) => {
-            const Icon = iconMap[item.icon] || ShieldCheck;
+            const Icon = iconMap[item.props?.icon || item.icon] || ShieldCheck;
             return (
               <motion.div
                 key={item.id}
@@ -86,10 +87,22 @@ const WhyChooseUs = () => {
                   <Icon className="text-secondary" size={26} />
                 </div>
                 <h3 className="text-[18px] font-bold tracking-tight text-white">
-                  {item.title?.[lang] || item.title?.en || item.title || ""}
+                  {item.props?.title?.[lang] ||
+                    item.props?.title?.en ||
+                    item.props?.title ||
+                    item.title?.[lang] ||
+                    item.title?.en ||
+                    item.title ||
+                    ""}
                 </h3>
                 <p className="mt-4 text-[14px] font-medium leading-7 text-white/40">
-                  {item.desc?.[lang] || item.desc?.en || item.desc || ""}
+                  {item.props?.description?.[lang] ||
+                    item.props?.description?.en ||
+                    item.props?.description ||
+                    item.desc?.[lang] ||
+                    item.desc?.en ||
+                    item.desc ||
+                    ""}
                 </p>
               </motion.div>
             );

@@ -10,7 +10,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { fetchForms, deleteForm } from "@/lib/store/forms/formsThunk";
+
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,21 +19,21 @@ import { RootState } from "@/lib/store/store";
 export default function FormsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { allForms, loading } = useAppSelector(
+  const { allForms, isLoading } = useAppSelector(
     (state: RootState) => state.adminForms,
   );
 
   const handleDelete = async (id: string, name: string) => {
-    if (
-      confirm(`Are you sure you want to delete form "${name.toUpperCase()}"?`)
-    ) {
-      try {
-        await dispatch(deleteForm(id)).unwrap();
-        toast.success("Form deleted successfully");
-      } catch (err) {
-        toast.error("Failed to delete form");
-      }
-    }
+    // if (
+    //   confirm(`Are you sure you want to delete form "${name.toUpperCase()}"?`)
+    // ) {
+    //   try {
+    //     await dispatch(deleteForm(id)).unwrap();
+    //     toast.success("Form deleted successfully");
+    //   } catch (err) {
+    //     toast.error("Failed to delete form");
+    //   }
+    // }
   };
 
   return (
@@ -56,7 +56,7 @@ export default function FormsPage() {
         </Button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="h-[40vh] flex flex-col items-center justify-center gap-6">
           <div className="h-12 w-12 border-4 border-slate-100 border-t-primary rounded-none animate-spin shadow-lg shadow-primary/10" />
           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
@@ -113,7 +113,7 @@ export default function FormsPage() {
                 <div className="flex items-center gap-2 font-black text-[10px] text-slate-300 uppercase tracking-widest">
                   <span>REF:</span>
                   <span className="text-slate-400 font-bold">
-                    #{form.id.slice(-6).toUpperCase()}
+                    #{form?.id?.slice(-6).toUpperCase()}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function FormsPage() {
                     variant="ghost"
                     size="icon"
                     className="h-10 w-10 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-500/20 transition-all shadow-sm"
-                    onClick={() => handleDelete(form.id, form.name)}
+                    onClick={() => handleDelete(form?.id??"", form?.name??"")}
                   >
                     <Trash2 size={18} />
                   </Button>

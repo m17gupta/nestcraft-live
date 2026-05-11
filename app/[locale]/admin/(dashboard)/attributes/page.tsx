@@ -250,7 +250,6 @@ function AttributesPageContent() {
             Attribute <span className="text-primary">Management</span>
           </h1>
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
             Configure dynamic specification sets for product variants and catalog logic.
           </p>
         </div>

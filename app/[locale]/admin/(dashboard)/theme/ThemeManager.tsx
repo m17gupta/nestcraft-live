@@ -942,7 +942,7 @@ function FontSelector({
             </SelectLabel>
             {staticFonts.map((font) => (
                   <SelectItem
-                    key={font.id}
+                    key={font?.name.toLowerCase()}
                     value={font.name}
                     className="hover:bg-slate-50 focus:bg-slate-50 cursor-pointer rounded-lg"
                   >

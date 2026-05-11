@@ -5,25 +5,25 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { useAppSelector } from "../store/hooks";
-import { fetchForms, fetchSubmissions } from "../store/forms/formsThunk";
+
 
 export default function GetAllForms() {
-  const { loading, hasFormsFetched } = useAppSelector(
-    (state: RootState) => state.adminForms,
-  );
+  // const { loading, hasFormsFetched } = useAppSelector(
+  //   (state: RootState) => state.adminForms,
+  // );
 
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
 
-  const { user: user } = useSelector((state: RootState) => state.auth);
+  // const { user: user } = useSelector((state: RootState) => state.auth);
 
-  useEffect(() => {
-    if (!user) return;
+  // useEffect(() => {
+  //   if (!user) return;
 
-    if (!hasFormsFetched && !loading) {
-      dispatch(fetchForms());
-      dispatch(fetchSubmissions({}));
-    }
-  }, [user, hasFormsFetched, loading]);
+  //   if (!hasFormsFetched && !loading) {
+  //     dispatch(fetchForms());
+  //     dispatch(fetchSubmissions({}));
+  //   }
+  // }, [user, hasFormsFetched, loading]);
 
   return null;
 }

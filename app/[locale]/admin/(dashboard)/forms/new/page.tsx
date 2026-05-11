@@ -3,7 +3,7 @@
 import React from "react";
 import { FormBuilder, FormField } from "@/components/admin/forms/FormBuilder";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { saveForm } from "@/lib/store/forms/formsThunk";
+// import { saveForm } from "@/lib/store/forms/formsThunk";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -13,19 +13,19 @@ import { RootState } from "@/lib/store/store";
 export default function NewFormPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { loading: formloading } = useAppSelector(
+  const { isLoading: formloading } = useAppSelector(
     (state: RootState) => state.adminForms,
   );
 
   const handleSave = async (name: string, fields: FormField[]) => {
-    try {
-      const tId = toast.loading("Saving form...");
-      await dispatch(saveForm({ payload: { name, fields } })).unwrap();
-      toast.success("Form created successfully", { id: tId });
-      setTimeout(() => router.push("/admin/forms"), 1000);
-    } catch (err: any) {
-      toast.error(err || "Failed to create form");
-    }
+    // try {
+    //   const tId = toast.loading("Saving form...");
+    //   await dispatch(saveForm({ payload: { name, fields } })).unwrap();
+    //   toast.success("Form created successfully", { id: tId });
+    //   setTimeout(() => router.push("/admin/forms"), 1000);
+    // } catch (err: any) {
+    //   toast.error(err || "Failed to create form");
+    // }
   };
 
   return (

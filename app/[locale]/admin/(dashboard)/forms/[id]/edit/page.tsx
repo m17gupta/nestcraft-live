@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { FormBuilder, FormField } from "@/components/admin/forms/FormBuilder";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { saveForm, fetchForms } from "@/lib/store/forms/formsThunk";
+;
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -15,14 +15,14 @@ export default function EditFormPage() {
   const params = useParams();
   const id = params.id as string;
   const dispatch = useAppDispatch();
-  const { allForms, loading } = useAppSelector((state: RootState) => state.adminForms);
+  const { allForms, isLoading } = useAppSelector((state: RootState) => state.adminForms);
   const [form, setForm] = useState<any>(null);
 
-  useEffect(() => {
-    if (allForms.length === 0) {
-      dispatch(fetchForms());
-    }
-  }, [allForms.length, dispatch]);
+  // useEffect(() => {
+  //   if (allForms.length === 0) {
+  //     dispatch(fetchForms());
+  //   }
+  // }, [allForms.length, dispatch]);
 
   useEffect(() => {
     if (allForms.length > 0 && id) {
@@ -37,14 +37,14 @@ export default function EditFormPage() {
   }, [allForms, id, router]);
 
   const handleSave = async (name: string, fields: FormField[]) => {
-    try {
-      const tId = toast.loading("Saving form...");
-      await dispatch(saveForm({ id, payload: { name, fields } })).unwrap();
-      toast.success("Form updated successfully", { id: tId });
-      setTimeout(() => router.push("/admin/forms"), 1000);
-    } catch (err: any) {
-      toast.error(err || "Failed to save form");
-    }
+    // try {
+    //   const tId = toast.loading("Saving form...");
+    //   await dispatch(saveForm({ id, payload: { name, fields } })).unwrap();
+    //   toast.success("Form updated successfully", { id: tId });
+    //   setTimeout(() => router.push("/admin/forms"), 1000);
+    // } catch (err: any) {
+    //   toast.error(err || "Failed to save form");
+    // }
   };
 
   if (!form) {
@@ -81,7 +81,7 @@ export default function EditFormPage() {
 
       <FormBuilder 
         onSave={handleSave} 
-        loading={loading} 
+        loading={isLoading} 
         initialFields={form.fields} 
         initialName={form.name} 
       />

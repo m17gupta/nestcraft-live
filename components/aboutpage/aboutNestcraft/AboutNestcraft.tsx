@@ -21,12 +21,17 @@ const AboutNestcraft = () => {
     if (!currentPages) return null;
     // We assume the adminTitle in CMS is "About Hero" or something similar.
     // Following the pattern from pageconstruction.md
-    return currentPages.content?.find((s: any) => s?.adminTitle === "About Hero");
+    return currentPages.content?.find((s: any) => s?.adminTitle === "About NestCraft");
   }, [currentPages]);
 
   // 3. Data Merging
-  const p = (section as any)?.props || defaultAboutNestcraftData.props;
-  const content = (section as any)?.content || defaultAboutNestcraftData.content;
+  const { p, content } = useMemo(() => {
+    return {
+      p: (section as any)?.props || defaultAboutNestcraftData.props,
+      content: (section as any)?.content || defaultAboutNestcraftData.content,
+    };
+  }, [section]);
+
 
   // Localized values
   const badge = p.badge?.[lang] || p.badge?.en || p.badge || "";
@@ -110,7 +115,7 @@ const AboutNestcraft = () => {
           transition={{ delay: 0.18 }}
           className="grid gap-4 sm:grid-cols-2"
         >
-          {content.map((item: any, idx: number) => (
+          {content?.map((item: any, idx: number) => (
             <div
               key={item.id || idx}
               className={`overflow-hidden rounded-[26px] border border-white/10 bg-white/10 backdrop-blur-md ${
@@ -118,8 +123,16 @@ const AboutNestcraft = () => {
               }`}
             >
               <img
-                src={item.image}
-                alt={item.alt?.[lang] || item.alt?.en || item.alt || "NestCraft interior"}
+                src={item.props?.image || item.image}
+                alt={
+                  item.props?.alt?.[lang] ||
+                  item.props?.alt?.en ||
+                  item.props?.alt ||
+                  item.alt?.[lang] ||
+                  item.alt?.en ||
+                  item.alt ||
+                  "NestCraft interior"
+                }
                 className="h-[240px] w-full object-cover"
               />
             </div>

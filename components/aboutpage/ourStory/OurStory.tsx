@@ -87,7 +87,13 @@ const OurStory = () => {
                     <CheckCircle2 className="text-secondary" size={16} />
                   </div>
                   <span className="text-[15px] font-bold text-white/90">
-                    {item.text?.[lang] || item.text?.en || item.text || ""}
+                    {item.props?.text?.[lang] ||
+                      item.props?.text?.en ||
+                      item.props?.text ||
+                      item.text?.[lang] ||
+                      item.text?.en ||
+                      item.text ||
+                      ""}
                   </span>
                 </div>
               ))}

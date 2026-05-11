@@ -25,13 +25,19 @@ export const defaultAboutNestcraftData = {
   content: [
     {
       id: "img-1",
-      image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&q=80&w=1200",
-      alt: { en: "Sofa interior", hi: "सोफा इंटीरियर" },
+      type: "item",
+      props: {
+        image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&q=80&w=1200",
+        alt: { en: "Sofa interior", hi: "सोफा इंटीरियर" },
+      },
     },
     {
       id: "img-2",
-      image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=1200",
-      alt: { en: "Chair and decor", hi: "कुर्सी और सजावट" },
+      type: "item",
+      props: {
+        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=1200",
+        alt: { en: "Chair and decor", hi: "कुर्सी और सजावट" },
+      },
     },
   ],
 };

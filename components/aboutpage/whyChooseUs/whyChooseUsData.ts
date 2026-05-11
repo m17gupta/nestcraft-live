@@ -32,27 +32,51 @@ export const defaultWhyChooseUsData = {
   content: [
     {
       id: "assur-1",
-      icon: "Truck",
-      title: { en: "Fast Delivery", hi: "तेज़ डिलीवरी" },
-      desc: { en: "Doorstep shipping with careful packaging and reliable updates at every stage.", hi: "सावधानीपूर्वक पैकेजिंग और हर चरण में विश्वसनीय अपडेट के साथ डोरस्टेप शिपिंग।" },
+      type: "item",
+      props: {
+        icon: "Truck",
+        title: { en: "Fast Delivery", hi: "तेज़ डिलीवरी" },
+        description: {
+          en: "Doorstep shipping with careful packaging and reliable updates at every stage.",
+          hi: "सावधानीपूर्वक पैकेजिंग और हर चरण में विश्वसनीय अपडेट के साथ डोरस्टेप शिपिंग।",
+        },
+      },
     },
     {
       id: "assur-2",
-      icon: "ShieldCheck",
-      title: { en: "Secure Checkout", hi: "सुरक्षित चेकआउट" },
-      desc: { en: "Safe transactions and trusted systems to protect your purchase and data.", hi: "आपकी खरीदारी और डेटा की सुरक्षा के लिए सुरक्षित लेनदेन और विश्वसनीय सिस्टम।" },
+      type: "item",
+      props: {
+        icon: "ShieldCheck",
+        title: { en: "Secure Checkout", hi: "सुरक्षित चेकआउट" },
+        description: {
+          en: "Safe transactions and trusted systems to protect your purchase and data.",
+          hi: "आपकी खरीदारी और डेटा की सुरक्षा के लिए सुरक्षित लेनदेन और विश्वसनीय सिस्टम।",
+        },
+      },
     },
     {
       id: "assur-3",
-      icon: "RefreshCcw",
-      title: { en: "Easy Returns", hi: "आसान रिटर्न" },
-      desc: { en: "Changed your mind? Our return support is designed to be simple and stress-free.", hi: "अपना मन बदल लिया? हमारा रिटर्न सपोर्ट सरल और तनावमुक्त होने के लिए डिज़ाइन किया गया है।" },
+      type: "item",
+      props: {
+        icon: "RefreshCcw",
+        title: { en: "Easy Returns", hi: "आसान रिटर्न" },
+        description: {
+          en: "Changed your mind? Our return support is designed to be simple and stress-free.",
+          hi: "अपना मन बदल लिया? हमारा रिटर्न सपोर्ट सरल और तनावमुक्त होने के लिए डिज़ाइन किया गया है।",
+        },
+      },
     },
     {
       id: "assur-4",
-      icon: "Ruler",
-      title: { en: "Made for Real Spaces", hi: "वास्तविक स्थानों के लिए निर्मित" },
-      desc: { en: "Pieces designed with practical sizing, everyday comfort, and lasting usability.", hi: "व्यावहारिक आकार, रोजमर्रा के आराम और स्थायी उपयोगिता के साथ डिज़ाइन किए गए टुकड़े।" },
+      type: "item",
+      props: {
+        icon: "Ruler",
+        title: { en: "Made for Real Spaces", hi: "वास्तविक स्थानों के लिए निर्मित" },
+        description: {
+          en: "Pieces designed with practical sizing, everyday comfort, and lasting usability.",
+          hi: "व्यावहारिक आकार, रोजमर्रा के आराम और स्थायी उपयोगिता के साथ डिज़ाइन किए गए टुकड़े।",
+        },
+      },
     },
   ],
 };

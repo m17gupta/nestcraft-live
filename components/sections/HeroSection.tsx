@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+// import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
 
 const autoplayTime = 5000;
 

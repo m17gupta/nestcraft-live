@@ -21,7 +21,7 @@ import {
   setCurrentProduct,
 } from "@/lib/store/products/productsSlices";
 import { saveProduct } from "@/lib/store/products/productsThunk";
-import { fetchForms } from "@/lib/store/forms/formsThunk";
+import { fetchAllForm } from "@/lib/store/forms/formsThunk";
 
 import {
   VariantRow,
@@ -70,27 +70,27 @@ export function ProductStudio() {
 
   console.log("relatedProductCandidates", relatedProductCandidates);
 
-  // Initial Load
-  useEffect(() => {
-    const init = async () => {
-      setLoading(true);
-      try {
-        if (isEditing && editId) {
-          // Wait for products to be fetched before finding
-        } else {
-          dispatch(resetProductForm());
-          setProductSlug("");
-        }
-        dispatch(fetchForms());
-      } catch (err) {
-        console.error("Product initialization failed", err);
-        toast.error("Initialization error: Could not connect to data hub.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, [editId, isEditing, dispatch]);
+  // // Initial Load
+  // useEffect(() => {
+  //   const init = async () => {
+  //     setLoading(true);
+  //     try {
+  //       if (isEditing && editId) {
+  //         // Wait for products to be fetched before finding
+  //       } else {
+  //         dispatch(resetProductForm());
+  //         setProductSlug("");
+  //       }
+  //       dispatch(fetchForms());
+  //     } catch (err) {
+  //       console.error("Product initialization failed", err);
+  //       toast.error("Initialization error: Could not connect to data hub.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   init();
+  // }, [editId, isEditing, dispatch]);
 
   // Sync editId with form
   useEffect(() => {

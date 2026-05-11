@@ -22,6 +22,8 @@ const OurProcess = () => {
     return currentPages.content?.find((s: any) => s?.adminTitle === "Our Process");
   }, [currentPages]);
 
+
+
   // 3. Data Merging
   const p = (section as any)?.props || defaultOurProcessData.props;
   const content = (section as any)?.content || defaultOurProcessData.content;
@@ -67,13 +69,25 @@ const OurProcess = () => {
               className="rounded-[32px] border border-white/5 bg-white/[0.03] p-8 transition-colors hover:border-white/10 hover:bg-white/[0.05]"
             >
               <div className="text-[12px] font-black uppercase tracking-[3px] text-secondary">
-                Step {item.step}
+                Step {item.props?.step || item.step}
               </div>
               <h3 className="mt-6 text-[22px] font-bold tracking-tight text-white">
-                {item.title?.[lang] || item.title?.en || item.title || ""}
+                {item.props?.title?.[lang] ||
+                  item.props?.title?.en ||
+                  item.props?.title ||
+                  item.title?.[lang] ||
+                  item.title?.en ||
+                  item.title ||
+                  ""}
               </h3>
               <p className="mt-4 text-[14px] font-medium leading-7 text-white/50">
-                {item.desc?.[lang] || item.desc?.en || item.desc || ""}
+                {item.props?.description?.[lang] ||
+                  item.props?.description?.en ||
+                  item.props?.description ||
+                  item.desc?.[lang] ||
+                  item.desc?.en ||
+                  item.desc ||
+                  ""}
               </p>
             </motion.div>
           ))}

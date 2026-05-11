@@ -27,7 +27,7 @@ const Difference = () => {
   // 2. CMS Data Fetching
   const section = useMemo(() => {
     if (!currentPages) return null;
-    return currentPages.content?.find((s: any) => s?.adminTitle === "What Defines Us");
+    return currentPages.content?.find((s: any) => s?.adminTitle === "Difference Section");
   }, [currentPages]);
 
   // 3. Data Merging
@@ -76,7 +76,7 @@ const Difference = () => {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {content.map((item: any, idx: number) => {
-            const Icon = iconMap[item.icon] || Sparkles;
+            const Icon = iconMap[item.props?.icon || item.icon] || Sparkles;
             return (
               <motion.div
                 key={item.id}
@@ -90,10 +90,22 @@ const Difference = () => {
                   <Icon className="text-secondary" size={28} />
                 </div>
                 <h3 className="text-[20px] font-bold tracking-tight text-white">
-                  {item.title?.[lang] || item.title?.en || item.title || ""}
+                  {item.props?.title?.[lang] ||
+                    item.props?.title?.en ||
+                    item.props?.title ||
+                    item.title?.[lang] ||
+                    item.title?.en ||
+                    item.title ||
+                    ""}
                 </h3>
                 <p className="mt-4 text-[14px] font-medium leading-7 text-white/50">
-                  {item.desc?.[lang] || item.desc?.en || item.desc || ""}
+                  {item.props?.description?.[lang] ||
+                    item.props?.description?.en ||
+                    item.props?.description ||
+                    item.desc?.[lang] ||
+                    item.desc?.en ||
+                    item.desc ||
+                    ""}
                 </p>
               </motion.div>
             );
