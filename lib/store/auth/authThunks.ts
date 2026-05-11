@@ -1,14 +1,19 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const loginThunk = createAsyncThunk(
   "auth/login",
   async (credentials: any, { rejectWithValue }) => {
     try {
-      const response: any = await fetch("/api/login", {
+      const response: any = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
         },
+        credentials: "include",
         body: JSON.stringify(credentials),
       });
 
@@ -20,7 +25,7 @@ export const loginThunk = createAsyncThunk(
 
       return {
         status: response.status,
-        user: data.user,
+        user: data.session,
       };
     } catch (error: any) {
       return rejectWithValue(error.message || "An unexpected error occurred");
@@ -32,10 +37,11 @@ export const getUserThunk = createAsyncThunk(
   "auth/getUser",
   async (_, { rejectWithValue }) => {
     try {
-      const response: any = await fetch("/api/login", {
+      const response: any = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
         },
         credentials: "include",
       });
@@ -47,7 +53,7 @@ export const getUserThunk = createAsyncThunk(
       }
       return {
         status: response.status,
-        user: data.user,
+        user: data.session,
       };
     } catch (error: any) {
       return rejectWithValue(error.message || "An unexpected error occurred");
@@ -59,10 +65,11 @@ export const logoutThunk = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response: any = await fetch("/api/login", {
-        method: "DELETE",
+      const response: any = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
         },
         credentials: "include",
       });
@@ -72,12 +79,77 @@ export const logoutThunk = createAsyncThunk(
       if (!response.ok) {
         return rejectWithValue(data.message || "Authentication failed");
       }
-      return {
-        status: response.status,
-        user: data.user,
-      };
+      return data;
     } catch (error: any) {
       return rejectWithValue(error.message || "An unexpected error occurred");
     }
   },
 );
+
+export const signupThunk = createAsyncThunk(
+  "auth/signup",
+  async (userData: any, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Registration failed");
+      }
+
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.message || "An unexpected error occurred during recruitment",
+      );
+    }
+  },
+);
+
+export const updateProfileThunk = createAsyncThunk(
+  "auth/updateProfile",
+  async (
+    {
+      userData,
+    }: {
+      userData: any;
+    },
+    { rejectWithValue, getState },
+  ) => {
+    try {
+      const { auth } = getState() as any;
+
+      const response = await fetch(
+        `${API_BASE_URL}/auth/update-profile`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "x-tenant-db": tenantHeader || "",
+          },
+          credentials: "include",
+          body: JSON.stringify({ ...userData, id: auth.user.id }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Profile update failed");
+      }
+
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "An unexpected error occurred");
+    }
+  },
+);
+

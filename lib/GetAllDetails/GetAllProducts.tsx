@@ -14,6 +14,7 @@ export default function GetAllProducts() {
 
   const dispatch = useDispatch<AppDispatch>();
 
+  const { user: user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
  

@@ -943,10 +943,14 @@ const Header = ({
   theme,
   toggleTheme,
   onSearchOpen,
+  logoUrl,
+  companyName,
 }: {
   theme: string;
   toggleTheme: () => void;
   onSearchOpen: () => void;
+  logoUrl?: string;
+  companyName?: string;
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeMegaTab, setActiveMegaTab] = useState<string | null>(null);
@@ -1071,8 +1075,8 @@ const Header = ({
             <Link href="/" className="block py-1">
           
               <img
-                src="/assets/Image/nestcraft-logo.svg"
-                alt="NestCraft"
+                src={logoUrl || "/assets/Image/nestcraft-logo.svg"}
+                alt={companyName || "NestCraft"}
                 className="h-14 sm:h-18 w-auto object-contain"
               />
             </Link>
@@ -1447,7 +1451,15 @@ const SearchOverlay = ({
   );
 };
 
-const Footer = () => (
+const Footer = ({
+  logoUrl,
+  companyName,
+  brandConfig,
+}: {
+  logoUrl?: string;
+  companyName?: string;
+  brandConfig?: any;
+}) => (
   <footer
     data-annotate-id="site-footer"
     className="border-t border-border bg-surface px-[5%] pb-10 pt-20"
@@ -1456,8 +1468,8 @@ const Footer = () => (
       <div className="space-y-6">
         <Link href="/" className="block">
           <img
-            src="/assets/Image/nestcraft-logo.svg"
-            alt="NestCraft"
+            src={logoUrl || "/assets/Image/nestcraft-logo.svg"}
+            alt={companyName || "NestCraft"}
             className="h-26 w-auto"
           />
         </Link>
@@ -1574,7 +1586,7 @@ const Footer = () => (
 
     <div className="md:flex text-center flex-col items-center justify-between gap-6 border-t border-border mt-10 pt-2 md:flex-row">
       <p className="py-2 text-[14px] font-medium transition-colors text-[#0b1610]">
-        © 2026 NestCraft Interiors. All rights reserved.
+        © {new Date().getFullYear()} {companyName || "NestCraft Interiors"}. All rights reserved.
       </p>
       <div className="flex items-center justify-center gap-8">
         <button
@@ -1610,8 +1622,10 @@ const Footer = () => (
 
 export default function SiteChrome({
   children,
+  brandConfig,
 }: {
   children: React.ReactNode;
+  brandConfig: any;
 }) {
   const [theme, setTheme] = useState("light");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -1644,19 +1658,27 @@ export default function SiteChrome({
     localStorage.setItem("theme", newTheme);
   };
 
+  const primaryLogo = brandConfig?.logos?.find((l: any) => l.id === "primary")?.url || 
+                     brandConfig?.logos?.[0]?.url || 
+                     "/assets/Image/nestcraft-logo.svg";
+  
+  const companyName = brandConfig?.companyInfo?.name || "NestCraft";
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header
         theme={theme}
         toggleTheme={toggleTheme}
         onSearchOpen={() => setIsSearchOpen(true)}
+        logoUrl={primaryLogo}
+        companyName={companyName}
       />
       <SearchOverlay
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
       />
       <main className="flex-1 w-full">{children}</main>
-      <Footer />
+      <Footer logoUrl={primaryLogo} companyName={companyName} brandConfig={brandConfig} />
     </div>
   );
 }

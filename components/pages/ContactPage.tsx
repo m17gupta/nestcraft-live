@@ -18,8 +18,8 @@ const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-      const {nestCraftUser}= useSelector((state:RootState)=>state.auth)
-  const handleSubmit = async (e: React.FormEvent) => {
+      const {user}= useSelector((state:RootState)=>state.auth)
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
@@ -55,7 +55,7 @@ const ContactPage = () => {
   return (
         <>
         {/* commentsS Plugin */}
-   {nestCraftUser?.role=="admin" && <AnnotatorPlugin />}
+   {user?.role=="admin" && <AnnotatorPlugin />}
    {/* get all page from the database */}
    <GetAllPages/>
     <div className="pb-20 bg-background">

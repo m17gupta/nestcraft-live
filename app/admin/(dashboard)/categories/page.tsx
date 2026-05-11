@@ -203,7 +203,9 @@ export default function CategoriesPage() {
       dispatch(fetchCategories());
       return resultAction.payload;
     } else {
-      throw new Error((resultAction.payload as any)?.message || "Import failed");
+      throw new Error(
+        (resultAction.payload as any)?.message || "Import failed",
+      );
     }
   };
 
@@ -215,8 +217,9 @@ export default function CategoriesPage() {
       description: "Devices for home automation and security.",
       pageStatus: "published",
       metaTitle: "Shop Smart Home Devices",
-      metaDescription: "Find the best deals on smart home hubs, cameras, and lights."
-    }
+      metaDescription:
+        "Find the best deals on smart home hubs, cameras, and lights.",
+    },
   ];
 
   const toggleExpand = (id: string, e?: React.MouseEvent) => {
@@ -594,7 +597,10 @@ export default function CategoriesPage() {
                       </SelectItem>
                       {categories
                         .filter(
-                          (c) => c.type === form.type && c._id !== editingId && c._id,
+                          (c) =>
+                            c.type === form.type &&
+                            c._id !== editingId &&
+                            c._id,
                         )
                         .map((c) => {
                           const n = c.title || "Unnamed";

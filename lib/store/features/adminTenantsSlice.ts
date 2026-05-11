@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 interface AdminTenantsState {
   items: any[];
   loading: boolean;
@@ -15,7 +17,9 @@ const initialState: AdminTenantsState = {
 export const fetchTenants = createAsyncThunk(
   'adminTenants/fetchTenants',
   async () => {
-    const response = await fetch('/api/admin/tenants');
+    const response = await fetch(`${API_BASE_URL}/admin/tenants`, {
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch tenants');
     }
@@ -23,6 +27,7 @@ export const fetchTenants = createAsyncThunk(
     return Array.isArray(data) ? data : [];
   }
 );
+
 
 const adminTenantsSlice = createSlice({
   name: 'adminTenants',

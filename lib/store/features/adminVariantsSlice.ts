@@ -1,14 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const fetchVariants = createAsyncThunk(
   'adminVariants/fetchVariants',
   async () => {
-    const response = await fetch('/api/ecommerce/variants');
+    const response = await fetch(`${API_BASE_URL}/commerce/variants`, {
+      headers: {
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
+    });
     if (!response.ok) throw new Error('Failed to fetch variants');
     return response.json();
   }
 );
+
 
 interface AdminVariantsState {
   items: any[];

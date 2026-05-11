@@ -17,15 +17,15 @@ export default function GetAllCategories({
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const { nestCraftUser } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    if (!nestCraftUser && type) return;
+    if (!user && type) return;
 
     if (!hasCategoriesFetched && !categoryLoading) {
       dispatch(fetchCategories());
     }
-  }, [nestCraftUser, hasCategoriesFetched, categoryLoading]);
+  }, [user, hasCategoriesFetched, categoryLoading]);
 
   return null;
 }

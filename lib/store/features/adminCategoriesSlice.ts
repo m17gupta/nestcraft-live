@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 interface AdminCategoriesState {
   items: any[];
@@ -15,7 +17,12 @@ const initialState: AdminCategoriesState = {
 export const fetchCategories = createAsyncThunk(
   'adminCategories/fetchCategories',
   async () => {
-    const response = await fetch('/api/ecommerce/categories');
+    const response = await fetch(`${API_BASE_URL}/commerce/categories`, {
+      headers: {
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch categories');
     }

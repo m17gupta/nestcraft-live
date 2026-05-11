@@ -14,16 +14,20 @@ import wishlistReducer from "./wishlist/wishlistSlice";
 import websiteDetailReducer from "./websiteDetail/websiteDetailSlice";
 import MenusReducer from "./menus/menusSlice";
 import formsReducer from "./forms/formsSlice";
+import adminUsersReducer from "./users/userSlice";
+import adminFormsReducer from "./forms/formsSlice";
+import brandingReducer from "./branding/brandingSlice";
+import businessBlueprintReducer from "./businessBlueprints/businessBlueprintSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       auth: authReducer,
       pages: pagesReducer,
-      menus:MenusReducer,
+      menus: MenusReducer,
       comments: commentsReducer,
       cart: cartReducer,
-         forms: formsReducer,
+      forms: formsReducer,
       adminProducts: productsReducer,
       adminCategories: categoryReducer,
       adminAttributes: attributesReducer,
@@ -31,7 +35,11 @@ export const makeStore = () => {
       adminOrders: adminOrdersReducer,
       wishlist: wishlistReducer,
       websiteDetail: websiteDetailReducer,
-   
+
+      adminUsers: adminUsersReducer,
+      adminForms: adminFormsReducer,
+      branding: brandingReducer,
+      businessBlueprint: businessBlueprintReducer,
     },
   });
 };

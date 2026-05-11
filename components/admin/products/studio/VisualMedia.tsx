@@ -1,9 +1,16 @@
-import React from "react";
-import { Image as ImageIcon, ImagePlus, Star, Trash2, Plus } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { SectionCard } from "./Common";
-import { ProductGalleryItem, readFileAsDataUrl } from "@/lib/admin-products/utils";
+"use client";
+
+import React, { useState } from "react";
+import {
+  Image as ImageIcon,
+  Plus,
+  Trash,
+  Star,
+  LayoutGrid,
+  Maximize2,
+} from "lucide-react";
 import { MediaLibraryModal } from "../../media/MediaLibraryModal";
+import { ProductGalleryItem } from "@/lib/admin-products/utils";
 
 interface VisualMediaProps {
   gallery: ProductGalleryItem[];
@@ -11,11 +18,11 @@ interface VisualMediaProps {
   galleryUrlDraft: string;
   onGalleryChange: (gallery: ProductGalleryItem[]) => void;
   onPrimaryImageChange: (id: string) => void;
-  onGalleryUrlDraftChange: (value: string) => void;
+  onGalleryUrlDraftChange: (url: string) => void;
   onAddGalleryItem: (item: ProductGalleryItem) => void;
 }
 
-export function VisualMedia({
+export const VisualMedia: React.FC<VisualMediaProps> = ({
   gallery,
   primaryImageId,
   galleryUrlDraft,
@@ -23,102 +30,117 @@ export function VisualMedia({
   onPrimaryImageChange,
   onGalleryUrlDraftChange,
   onAddGalleryItem,
-}: VisualMediaProps) {
-  const handleGalleryUpload = async (files: FileList | null) => {
-    if (!files) return;
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
-      const url = await readFileAsDataUrl(file);
-      const id = `gal-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
-      onAddGalleryItem({ id, url, alt: file.name, order: gallery.length });
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const removeImage = (id: string) => {
+    const next = gallery.filter((item) => item.id !== id);
+    onGalleryChange(next);
+    if (primaryImageId === id) {
+      onPrimaryImageChange(next.length > 0 ? next[0].id : "");
     }
   };
 
-  const handleAddRemoteUrl = () => {
-    if (!galleryUrlDraft) return;
-    const id = `gal-url-${Date.now()}`;
-    onAddGalleryItem({
-      id,
-      url: galleryUrlDraft,
-      alt: "",
+  const handleSelectFromLibrary = (media: { url: string; alt: string }) => {
+    const newItem: ProductGalleryItem = {
+      id: `lib-${Date.now()}`,
+      url: media.url,
+      alt: media.alt || "",
       order: gallery.length,
-    });
-    onGalleryUrlDraftChange("");
+    };
+    onAddGalleryItem(newItem);
+    setIsModalOpen(false);
   };
 
   return (
-    <SectionCard
-      icon={<ImageIcon className="text-purple-500" size={16} />}
-      title="Visual Media"
-    >
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-        <AnimatePresence mode="popLayout">
+    <>
+      <MediaLibraryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleSelectFromLibrary}
+      />
+      <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-xl italic">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="h-12 w-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+              <LayoutGrid size={22} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.3em] italic">
+              Media Gallery
+            </h3>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-8 py-3.5 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-900 transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20 italic active:scale-95"
+          >
+            <Plus size={18} strokeWidth={3} /> Browse Media
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {gallery.map((item) => (
-            <motion.div
-              layout
+            <div
               key={item.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className={`relative aspect-square group rounded-xl overflow-hidden border transition-all ${
+              className={`relative aspect-square group bg-slate-50 border-2 transition-all duration-300 rounded-[1.5rem] overflow-hidden shadow-sm ${
                 primaryImageId === item.id
-                  ? "border-slate-900 shadow-sm"
-                  : "border-slate-100"
+                  ? "border-primary shadow-xl shadow-primary/20"
+                  : "border-slate-50 hover:border-primary/20"
               }`}
             >
-              <img src={item.url} alt="" className="h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+              <img
+                src={item.url}
+                alt={item.alt}
+                className="h-full w-full object-cover transition-all group-hover:scale-110 duration-700"
+              />
+
+              {/* Controls */}
+              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
                 <button
-                  type="button"
                   onClick={() => onPrimaryImageChange(item.id)}
-                  className={`p-1.5 rounded-full ${
-                    primaryImageId === item.id
-                      ? "bg-amber-400 text-white"
-                      : "bg-white/20 text-white"
-                  }`}
+                  className={`p-3 rounded-xl transition-all shadow-xl active:scale-90 ${primaryImageId === item.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:text-primary"}`}
+                  title="Set as Primary"
                 >
                   <Star
-                    size={12}
+                    size={16}
+                    strokeWidth={2.5}
                     fill={primaryImageId === item.id ? "currentColor" : "none"}
                   />
                 </button>
                 <button
-                  type="button"
-                  onClick={() => {
-                    const nextGallery = gallery.filter((g) => g.id !== item.id);
-                    onGalleryChange(nextGallery);
-                    if (primaryImageId === item.id) {
-                      onPrimaryImageChange(nextGallery[0]?.id || "");
-                    }
-                  }}
-                  className="p-1.5 rounded-full bg-rose-500 text-white"
+                  onClick={() => removeImage(item.id)}
+                  className="p-3 bg-white text-slate-400 hover:text-red-500 rounded-xl transition-all shadow-xl active:scale-90"
+                  title="Delete Asset"
                 >
-                  <Trash2 size={12} />
+                  <Trash size={16} strokeWidth={2.5} />
                 </button>
               </div>
-            </motion.div>
+
+              {primaryImageId === item.id && (
+                <div className="absolute top-3 left-3 px-3 py-1 bg-primary text-white text-[8px] font-black uppercase tracking-[0.2em] rounded-lg shadow-lg italic">
+                  Primary Image
+                </div>
+              )}
+            </div>
           ))}
-        </AnimatePresence>
-        <MediaLibraryModal
-          onSelect={(media) => {
-            const id = `gal-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
-            onAddGalleryItem({
-              id,
-              url: media.url,
-              alt: media.alt || "",
-              order: gallery.length,
-            });
-          }}
-          trigger={
-            <div className="aspect-square flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 cursor-pointer transition-all h-full w-full">
-              <ImagePlus className="text-slate-400" size={18} />
-              <span className="text-[8px] font-black uppercase text-slate-400">
-                Add
+
+          {/* Empty State / Add Placeholder */}
+          {gallery.length === 0 && (
+            <div
+              onClick={() => setIsModalOpen(true)}
+              className="aspect-square border-2 border-dashed border-slate-100 bg-slate-50/50 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-slate-50 hover:border-primary/20 transition-all group rounded-[1.5rem] shadow-inner italic"
+            >
+              <ImageIcon
+                size={40}
+                strokeWidth={2.5}
+                className="text-slate-200 group-hover:text-primary transition-colors"
+              />
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest group-hover:text-primary">
+                Add Images
               </span>
             </div>
-          }
-        />
+          )}
+        </div>
       </div>
-    </SectionCard>
+    </>
   );
-}
+};

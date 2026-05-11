@@ -25,7 +25,7 @@ export default function GetAllProducts() {
     if (checkIsFetched(allProducts, id)) {
       return;
     }
-    dispatch(fetchProductsByCategory(id));
+    dispatch(fetchProductsByCategory({ category: id, filters: {} }));
   }, [id]);
 
   return null;

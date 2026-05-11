@@ -1,10 +1,18 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/ecommerce/cart");
+      const response = await fetch(`${API_BASE_URL}/commerce/cart`, {
+        headers: {
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
+      });
       if (!response.ok) throw new Error("Failed to fetch cart");
       const data = await response.json();
       return data;
@@ -18,9 +26,13 @@ export const addToCartAsync = createAsyncThunk(
   "cart/addToCart",
   async (item: any, { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/ecommerce/cart", {
+      const response = await fetch(`${API_BASE_URL}/commerce/cart`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
         body: JSON.stringify(item),
       });
       if (!response.ok) throw new Error("Failed to add to cart");
@@ -39,9 +51,13 @@ export const updateQuantityAsync = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const response = await fetch("/api/ecommerce/cart", {
+      const response = await fetch(`${API_BASE_URL}/commerce/cart`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
         body: JSON.stringify({ cartItemId, quantity }),
       });
       if (!response.ok) throw new Error("Failed to update quantity");
@@ -58,9 +74,14 @@ export const removeFromCartAsync = createAsyncThunk(
   async (cartItemId: string, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `/api/ecommerce/cart?cartItemId=${cartItemId}`,
+        `${API_BASE_URL}/commerce/cart?cartItemId=${cartItemId}`,
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "x-tenant-db": tenantHeader || "",
+          },
+          credentials: "include",
         },
       );
       if (!response.ok) throw new Error("Failed to remove from cart");
@@ -76,8 +97,13 @@ export const clearCartAsync = createAsyncThunk(
   "cart/clearCart",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/ecommerce/cart?clear=true", {
+      const response = await fetch(`${API_BASE_URL}/commerce/cart?clear=true`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to clear cart");
       const data = await response.json();
@@ -87,3 +113,4 @@ export const clearCartAsync = createAsyncThunk(
     }
   },
 );
+

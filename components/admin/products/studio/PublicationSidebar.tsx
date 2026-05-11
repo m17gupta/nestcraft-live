@@ -1,25 +1,33 @@
+"use client";
+
 import React from "react";
-import { Settings, ShoppingBag, Sparkles, Check, Package } from "lucide-react";
-import { SectionCard, InputLabel } from "./Common";
 import {
-  PRODUCT_TEMPLATE_OPTIONS,
-  normalizeProductTemplateKey,
-} from "@/lib/commerce-template-options";
+  Check,
+  ChevronRight,
+  Globe,
+  LayoutGrid,
+  Monitor,
+  ShieldAlert,
+  Zap,
+} from "lucide-react";
+import { CategoryRecord } from "@/lib/store/categories/categoriesSlices";
 
 interface PublicationSidebarProps {
   status: string;
   templateKey: string;
-  allCategories: any[];
+  allCategories: CategoryRecord[];
   categoryIds: string[];
   primaryCategoryId: string;
   relatedProductCandidates: any[];
   relatedProductIds: string[];
   onFormChange: (field: string, value: any) => void;
-  onToggleCategory: (slug: string) => void;
+  onToggleCategory: (id: string) => void;
   onToggleRelatedProduct: (id: string) => void;
+  allForms: any[];
+  formId: string;
 }
 
-export function PublicationSidebar({
+export const PublicationSidebar: React.FC<PublicationSidebarProps> = ({
   status,
   templateKey,
   allCategories,
@@ -30,183 +38,182 @@ export function PublicationSidebar({
   onFormChange,
   onToggleCategory,
   onToggleRelatedProduct,
-}: PublicationSidebarProps) {
-  // Helper to build hierarchy
-  const buildTree = (
-    nodes: any[],
-    parentId: string | null = null,
-    level = 0,
-  ): any[] => {
-    return nodes
-      .filter((node) => node.parentId === parentId)
-      .reduce((acc, node) => {
-        return [
-          ...acc,
-          { ...node, level },
-          ...buildTree(nodes, node._id, level + 1),
-        ];
-      }, []);
-  };
-
-  const hierarchicalCategories = buildTree(allCategories);
-
+  allForms,
+  formId,
+}) => {
   return (
-    <div className="space-y-4">
-      <SectionCard
-        icon={<Settings className="text-slate-400" size={16} />}
-        title="Publication"
-      >
-        <div className="space-y-4">
-          <div>
-            <InputLabel label="Asset Status" />
-            <div className="grid grid-cols-3 gap-2">
-              {["draft", "active", "archived"].map((st) => (
-                <button
-                  type="button"
-                  key={st}
-                  onClick={() => onFormChange("status", st)}
-                  className={`py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all border ${
-                    status === st
-                      ? "bg-slate-900 border-slate-900 text-white shadow-sm shadow-slate-200"
-                      : "bg-white border-slate-200 text-slate-400 hover:border-slate-300"
-                  }`}
-                >
-                  {st}
-                </button>
-              ))}
-            </div>
+    <div className="space-y-6">
+      <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-8 shadow-xl italic">
+        <div className="flex items-center gap-5">
+          <div className="h-12 w-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+            <Monitor size={22} strokeWidth={2.5} />
           </div>
-          <div>
-            <InputLabel label="Visual Template" />
-            <div className="relative">
-              <select
-                value={templateKey}
-                onChange={(e) =>
-                  onFormChange(
-                    "templateKey",
-                    normalizeProductTemplateKey(e.target.value),
-                  )
-                }
-                className="compact-input appearance-none text-slate-700 font-bold pr-8"
-              >
-                {PRODUCT_TEMPLATE_OPTIONS.map((opt) => (
-                  <option key={opt.key} value={opt.key}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <Settings size={12} />
-              </div>
-            </div>
-          </div>
+          <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.3em] italic">
+            Product Status
+          </h3>
         </div>
-      </SectionCard>
 
-      <SectionCard
-        icon={<ShoppingBag className="text-pink-400" size={16} />}
-        title="Organization"
-      >
         <div className="space-y-4">
-          <div>
-            <InputLabel label="Categories" />
-            <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1 flex flex-col gap-1">
-              {hierarchicalCategories.map((cat) => {
-                const selected = categoryIds.includes(cat.slug);
-                return (
-                  <div
-                    key={cat._id}
-                    onClick={() => onToggleCategory(cat.slug)}
-                    className={`group flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer ${
-                      selected
-                        ? "bg-blue-50/50 border-blue-200"
-                        : "bg-white border-slate-100 hover:border-slate-200"
-                    }`}
-                    style={{ marginLeft: `${cat.level * 16}px` }}
-                  >
-                    <div>
-                      <div
-                        className={`text-[11px] font-bold ${selected ? "text-blue-700" : "text-slate-700"}`}
-                      >
-                        {cat.name}
-                      </div>
-                      <div className="text-[8px] text-slate-400 font-mono">
-                        /{cat.slug}
-                      </div>
-                    </div>
-                    <div
-                      className={`h-4 w-4 rounded-md border flex items-center justify-center transition-all ${selected ? "bg-blue-600 border-blue-600 text-white" : "border-slate-200"}`}
-                    >
-                      {selected && <Check size={10} strokeWidth={3} />}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {categoryIds.length > 0 && (
-            <div>
-              <InputLabel label="Primary Category" />
-              <div className="relative">
-                <select
-                  value={primaryCategoryId}
-                  onChange={(e) =>
-                    onFormChange("primaryCategoryId", e.target.value)
-                  }
-                  className="compact-input appearance-none text-slate-700 font-bold pr-8"
-                >
-                  <option value="">Select Primary Category</option>
-                  {allCategories
-                    .filter((cat) => categoryIds.includes(cat.slug))
-                    .map((cat) => (
-                      <option key={cat._id} value={cat.slug}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                  <ShoppingBag size={12} />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </SectionCard>
-
-      <SectionCard
-        icon={<Sparkles className="text-amber-400" size={16} />}
-        title="Cross-Sells"
-      >
-        <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1 flex flex-col gap-1">
-          {relatedProductCandidates.map((prod) => {
-            const selected = relatedProductIds.includes(prod._id);
-            return (
-              <div
-                key={prod._id}
-                onClick={() => onToggleRelatedProduct(prod._id)}
-                className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${selected ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-100"}`}
-              >
+          {[
+            { id: "active", label: "Active", color: "emerald" },
+            { id: "draft", label: "Draft", color: "amber" },
+            {
+              id: "archived",
+              label: "Archived",
+              color: "slate",
+            },
+          ].map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onFormChange("status", s.id)}
+              className={`w-full p-5 border rounded-2xl flex items-center justify-between transition-all group ${
+                status === s.id
+                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                  : "bg-slate-50 border-slate-100 text-slate-400 hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-4">
                 <div
-                  className={`w-6 h-6 rounded-md flex items-center justify-center ${selected ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"}`}
+                  className={`h-2.5 w-2.5 rounded-full ${status === s.id ? `bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]` : `bg-${s.color}-400`}`}
+                />
+                <span
+                  className={`text-[11px] font-black uppercase tracking-widest ${status === s.id ? "text-white" : "text-slate-500"}`}
                 >
-                  <Package size={10} />
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <div
-                    className={`text-[10px] font-bold truncate ${selected ? "text-emerald-700" : "text-slate-700"}`}
-                  >
-                    {prod.name}
-                  </div>
-                  <div className="text-[8px] text-slate-400 font-mono tracking-tighter">
-                    {prod.sku}
-                  </div>
+                  {s.label}
+                </span>
+              </div>
+              {status === s.id && <Check size={18} strokeWidth={3} className="text-white" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Categories Selection */}
+      <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-8 shadow-xl italic">
+        <div className="flex items-center gap-5">
+          <div className="h-12 w-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+            <LayoutGrid size={22} strokeWidth={2.5} />
+          </div>
+          <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.3em] italic">
+            Category Selection
+          </h3>
+        </div>
+
+        <div className="max-h-[350px] overflow-y-auto pr-3 space-y-3 custom-scrollbar">
+          {allCategories.map((cat) => (
+            <label
+              key={cat._id}
+              className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all italic ${
+                categoryIds.includes(String(cat._id))
+                  ? "bg-primary/5 border-primary/20 shadow-sm"
+                  : "bg-slate-50 border-slate-100 hover:border-primary/10"
+              }`}
+            >
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  className="peer hidden"
+                  checked={categoryIds.includes(String(cat._id))}
+                  onChange={() => onToggleCategory(String(cat._id))}
+                />
+                <div className="h-5 w-5 bg-white border border-slate-200 rounded-lg peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center shadow-inner">
+                  <Check
+                    size={12}
+                    strokeWidth={4}
+                    className="text-white scale-0 peer-checked:scale-100 transition-transform"
+                  />
                 </div>
               </div>
-            );
-          })}
+              <div className="flex flex-col">
+                <span
+                  className={`text-[11px] font-black uppercase tracking-widest ${categoryIds.includes(String(cat._id)) ? "text-slate-900" : "text-slate-400"}`}
+                >
+                  {cat.name || cat.title}
+                </span>
+                <span className="text-[8px] font-bold text-slate-300 uppercase tracking-[0.2em] mt-0.5">
+                  {cat.slug}
+                </span>
+              </div>
+            </label>
+          ))}
         </div>
-      </SectionCard>
+      </div>
+
+      {/* Operations Support (Related Products) */}
+      <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-8 shadow-xl italic">
+        <div className="flex items-center gap-5">
+          <div className="h-12 w-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+            <ShieldAlert size={22} strokeWidth={2.5} />
+          </div>
+          <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.3em] italic">
+            Product Cross-Sells
+          </h3>
+        </div>
+
+        <div className="max-h-[250px] overflow-y-auto pr-3 space-y-3 custom-scrollbar">
+          {relatedProductCandidates.map((p) => (
+            <label
+              key={p._id}
+              className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all italic ${
+                relatedProductIds.includes(p._id!)
+                  ? "bg-primary/5 border-primary/20 shadow-sm"
+                  : "bg-slate-50 border-slate-100 hover:border-primary/10"
+              }`}
+            >
+              <input
+                type="checkbox"
+                className="peer hidden"
+                checked={relatedProductIds.includes(p._id!)}
+                onChange={() => onToggleRelatedProduct(p._id!)}
+              />
+              <div className="h-5 w-5 bg-white border border-slate-200 rounded-lg peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center shadow-inner">
+                <Check size={12} strokeWidth={4} className="text-white" />
+              </div>
+              <span
+                className={`text-[11px] font-black uppercase tracking-widest ${relatedProductIds.includes(p._id!) ? "text-slate-900" : "text-slate-400"}`}
+              >
+                {p.name}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-8 shadow-xl italic">
+        <div className="flex items-center gap-5">
+          <div className="h-12 w-12 bg-primary/5 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+            <Zap size={22} strokeWidth={2.5} />
+          </div>
+          <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.3em] italic">
+            Linked Structure
+          </h3>
+        </div>
+
+        <div className="space-y-6">
+          <label className="block space-y-3">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] italic ml-1">
+              Select Form Template
+            </span>
+            <select
+              value={formId}
+              onChange={(e) => onFormChange("formId", e.target.value)}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-5 text-[11px] font-black uppercase tracking-widest text-primary italic focus:border-primary/50 outline-none transition-all shadow-inner"
+            >
+              <option value="">NO TEMPLATE LINKED</option>
+              {allForms.map((f: any) => (
+                <option key={f.id} value={f.id}>
+                  {f.name.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="p-5 bg-primary/5 border border-primary/10 rounded-2xl">
+            <p className="text-[9px] text-slate-500 uppercase leading-relaxed font-bold tracking-widest">
+              Linking a form template allows for custom data capture during the customer checkout process.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};

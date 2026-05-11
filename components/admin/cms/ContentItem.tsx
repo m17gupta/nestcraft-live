@@ -1,16 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Type, 
-  AlignLeft, 
-  Image as ImageIcon, 
-  Link as LinkIcon, 
-  List, 
-  Trash, 
+import {
+  Type,
+  AlignLeft,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  List,
+  Trash,
   ChevronDown,
   ChevronUp,
   FileText,
@@ -19,11 +19,23 @@ import {
   Zap,
   Quote,
   GalleryHorizontal,
-  PlusCircle
+  PlusCircle,
+  Terminal,
+  Activity,
+  Maximize2,
+  ShieldCheck,
 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SectionBlock } from "./SectionBlock";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SectionBlock } from "@/components/admin/cms/SectionBlock";
 import { MediaLibraryModal } from "../media/MediaLibraryModal";
+import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/lib/store/hooks";
 
 interface ContentItemProps {
   item: any;
@@ -44,40 +56,149 @@ export const ContentItem: React.FC<ContentItemProps> = ({
   isFirst,
   isLast,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { config: brandConfig, isLoading: loading } = useAppSelector(
+    (state) => state.branding,
+  );
+
+  const activeLanguages = brandConfig?.languages?.available?.filter(
+    (l) => l.enabled,
+  ) || [{ code: "en", name: "English", enabled: true }];
+  const defaultLang = brandConfig?.languages?.default || "en";
+
+  const getLocalizedValue = (val: any, langCode: string) => {
+    if (typeof val === "object" && val !== null && !Array.isArray(val)) {
+      return val[langCode] || "";
+    }
+    if (langCode === defaultLang && typeof val === "string") {
+      return val;
+    }
+    return "";
+  };
+
+  const updateLocalizedValue = (
+    currentVal: any,
+    langCode: string,
+    newValue: string,
+  ) => {
+    const obj =
+      typeof currentVal === "object" &&
+      currentVal !== null &&
+      !Array.isArray(currentVal)
+        ? { ...currentVal }
+        : { [defaultLang]: typeof currentVal === "string" ? currentVal : "" };
+
+    obj[langCode] = newValue;
+    return obj;
+  };
+
+  const getPreviewText = () => {
+    switch (item.type) {
+      case "heading":
+        const hText = item.text;
+        const previewH =
+          typeof hText === "object"
+            ? hText[defaultLang] || Object.values(hText)[0]
+            : hText;
+        return previewH || "No heading content";
+      case "paragraph":
+        const pText = item.text;
+        const previewP =
+          typeof pText === "object"
+            ? pText[defaultLang] || Object.values(pText)[0]
+            : pText;
+        return previewP
+          ? (previewP as string).length > 50
+            ? (previewP as string).substring(0, 50).toUpperCase() + "..."
+            : (previewP as string).toUpperCase()
+          : "Empty text block";
+      case "image":
+        return item.url
+          ? item.url.split("/").pop()?.toUpperCase() || "Image uploaded"
+          : "No image uploaded";
+      case "button":
+        const btns = item.buttons || [];
+        return btns.length > 0
+          ? `${btns.length} Buttons configured`
+          : "No buttons";
+      case "carousel":
+        return `${(item.items || []).length} Slides`;
+      case "cards":
+        return `${(item.items || []).length} Cards`;
+      case "list":
+        return `${(item.items || []).length} List items`;
+      case "cta":
+        const ctaTitle = item.title;
+        const previewCTA =
+          typeof ctaTitle === "object"
+            ? ctaTitle[defaultLang] || Object.values(ctaTitle)[0]
+            : ctaTitle;
+        return previewCTA || "Call to action block";
+      default:
+        return "Active component";
+    }
+  };
+
   const renderFields = () => {
     switch (item.type) {
       case "carousel":
         return (
-          <div className="space-y-4">
+          <div className="space-y-8">
             {(item.items || []).map((slide: any, idx: number) => (
-              <div key={idx} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 relative group/slide">
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100/50">
-                   <div className="flex items-center gap-2">
-                     <span className="p-1 px-2 rounded-lg bg-slate-900 text-[8px] font-black uppercase text-white">Slide #{idx + 1}</span>
-                     <Input 
-                        value={slide.adminTitle || ""} 
-                        onChange={(e) => {
-                          const newItems = [...item.items];
-                          newItems[idx] = { ...slide, adminTitle: e.target.value };
-                          onChange({ items: newItems });
-                        }} 
-                        placeholder="Slide Title (Internal)..." 
-                        className="h-6 text-[10px] font-bold border-none bg-transparent p-0 w-32 focus-visible:ring-0" 
-                     />
-                   </div>
-                   <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg" 
+              <div
+                key={idx}
+                className="bg-slate-50 border border-slate-100 p-6 rounded-2xl relative group/slide shadow-inner"
+              >
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/50">
+                  <div className="flex items-center gap-4">
+                    <span className="px-4 py-1.5 bg-primary text-[10px] font-black uppercase text-white rounded-lg italic">
+                      Slide #{idx + 1}
+                    </span>
+                    <div className="flex-1 space-y-2">
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-primary/30 pointer-events-none uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </div>
+                          <Input
+                            value={getLocalizedValue(
+                              slide.adminTitle,
+                              lang.code,
+                            )}
+                            onChange={(e) => {
+                              const newItems = [...item.items];
+                              newItems[idx] = {
+                                ...slide,
+                                adminTitle: updateLocalizedValue(
+                                  slide.adminTitle,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              };
+                              onChange({ items: newItems });
+                            }}
+                            placeholder={`SLIDE TITLE (${lang.name})...`}
+                            className="h-8 text-[11px] font-bold border-none bg-transparent p-0 w-full focus-visible:ring-0 text-slate-900 uppercase tracking-widest pl-10 italic"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                     onClick={() => {
-                      const newItems = item.items.filter((_: any, i: number) => i !== idx);
+                      const newItems = item.items.filter(
+                        (_: any, i: number) => i !== idx,
+                      );
                       onChange({ items: newItems });
                     }}
                   >
-                    <Trash size={14} />
+                    <Trash size={18} strokeWidth={2.5} />
                   </Button>
                 </div>
-                <div className="mt-2 border-l-2 border-slate-200 pl-4 py-2 w-full">
+                <div className="mt-4 border-l-4 border-primary pl-6 py-4 w-full bg-white rounded-xl shadow-sm">
                   <SectionBlock
                     section={slide}
                     onUpdate={(updates) => {
@@ -86,19 +207,27 @@ export const ContentItem: React.FC<ContentItemProps> = ({
                       onChange({ items: newItems });
                     }}
                     onRemove={() => {
-                      const newItems = item.items.filter((_: any, i: number) => i !== idx);
+                      const newItems = item.items.filter(
+                        (_: any, i: number) => i !== idx,
+                      );
                       onChange({ items: newItems });
                     }}
                     onMoveUp={() => {
                       if (idx === 0) return;
                       const newItems = [...item.items];
-                      [newItems[idx], newItems[idx-1]] = [newItems[idx-1], newItems[idx]];
+                      [newItems[idx], newItems[idx - 1]] = [
+                        newItems[idx - 1],
+                        newItems[idx],
+                      ];
                       onChange({ items: newItems });
                     }}
                     onMoveDown={() => {
                       if (idx === item.items.length - 1) return;
                       const newItems = [...item.items];
-                      [newItems[idx], newItems[idx+1]] = [newItems[idx+1], newItems[idx]];
+                      [newItems[idx], newItems[idx + 1]] = [
+                        newItems[idx + 1],
+                        newItems[idx],
+                      ];
                       onChange({ items: newItems });
                     }}
                     isFirst={idx === 0}
@@ -107,23 +236,30 @@ export const ContentItem: React.FC<ContentItemProps> = ({
                 </div>
               </div>
             ))}
-            <Button variant="outline" size="sm" className="w-full text-[10px] h-10 border-dashed border-slate-200 text-slate-400 hover:text-slate-600 rounded-2xl gap-2" onClick={() => {
-              const newItems = [...(item.items || []), { 
-                id: Math.random().toString(36).substr(2, 9),
-                adminTitle: "",
-                layout: "grid-1", 
-                columns: [[]] 
-              }];
-              onChange({ items: newItems });
-            }}>
-              <PlusCircle size={14} /> Add New slide
+            <Button
+              variant="outline"
+              className="w-full py-6 border-dashed border-slate-200 bg-white text-slate-400 font-black uppercase tracking-[0.3em] text-[11px] hover:text-primary hover:border-primary/30 transition-all rounded-2xl gap-4 italic shadow-sm active:scale-95"
+              onClick={() => {
+                const newItems = [
+                  ...(item.items || []),
+                  {
+                    id: Math.random().toString(36).substr(2, 9),
+                    adminTitle: "New slide item",
+                    layout: "grid-1",
+                    columns: [[]],
+                  },
+                ];
+                onChange({ items: newItems });
+              }}
+            >
+              <PlusCircle size={20} className="text-primary" strokeWidth={2.5} /> Add New Carousel Slide
             </Button>
           </div>
         );
 
       case "section":
         return (
-          <div className="mt-2 border-l-2 border-slate-200 pl-4 py-2 w-full">
+          <div className="mt-4 border-l-4 border-primary pl-6 py-4 w-full bg-white rounded-2xl shadow-sm">
             <SectionBlock
               section={item}
               onUpdate={(updates) => onChange(updates)}
@@ -138,417 +274,719 @@ export const ContentItem: React.FC<ContentItemProps> = ({
 
       case "heading":
         return (
-          <div className="flex flex-col gap-3">
-            <div className="flex gap-2 items-center">
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-4 items-center">
               <Select
                 value={item.level || "h1"}
                 onValueChange={(val) => onChange({ level: val })}
               >
-                <SelectTrigger className="w-[70px] h-8 text-[10px] font-bold">
-                  <SelectValue placeholder="Level" />
+                <SelectTrigger className="w-[100px] h-12 bg-slate-50 border border-slate-100 text-[11px] font-black text-primary uppercase tracking-widest rounded-xl shadow-inner italic">
+                  <SelectValue placeholder="SIZE" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="h1">H1</SelectItem>
-                  <SelectItem value="h2">H2</SelectItem>
-                  <SelectItem value="h3">H3</SelectItem>
-                  <SelectItem value="h4">H4</SelectItem>
-                  <SelectItem value="h5">H5</SelectItem>
-                  <SelectItem value="h6">H6</SelectItem>
+                <SelectContent className="bg-white border-slate-100 text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-2xl p-2 italic">
+                  <SelectItem value="h1" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">SIZE 01</SelectItem>
+                  <SelectItem value="h2" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">SIZE 02</SelectItem>
+                  <SelectItem value="h3" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">SIZE 03</SelectItem>
+                  <SelectItem value="h4" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">SIZE 04</SelectItem>
+                  <SelectItem value="h5" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">SIZE 05</SelectItem>
+                  <SelectItem value="h6" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">SIZE 06</SelectItem>
                 </SelectContent>
               </Select>
-              <Input
-                placeholder="Heading text..."
-                value={item.text || ""}
-                onChange={(e) => onChange({ text: e.target.value })}
-                className="h-8 text-sm font-bold border-slate-200"
-              />
+              <div className="flex-1 space-y-3">
+                {activeLanguages.map((lang) => (
+                  <div key={lang.code} className="relative group/lang">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 pointer-events-none uppercase group-focus-within/lang:text-primary transition-colors">
+                      {lang.code}
+                    </div>
+                    <Input
+                      placeholder={`ENTER SECTION HEADING (${lang.name})...`}
+                      value={getLocalizedValue(item.text, lang.code)}
+                      onChange={(e) =>
+                        onChange({
+                          text: updateLocalizedValue(
+                            item.text,
+                            lang.code,
+                            e.target.value,
+                          ),
+                        })
+                      }
+                      className="h-12 bg-slate-50 border border-slate-100 text-[13px] font-bold text-slate-900 hover:border-primary/30 transition-all uppercase tracking-widest rounded-xl pl-12 shadow-inner italic"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
 
       case "paragraph":
         return (
-          <Textarea
-            placeholder="Write your content here..."
-            value={item.text || ""}
-            onChange={(e) => onChange({ text: e.target.value })}
-            className="min-h-[80px] text-sm border-slate-200"
-          />
+          <div className="space-y-4">
+            {activeLanguages.map((lang) => (
+              <div key={lang.code} className="relative group/lang">
+                <div className="absolute left-4 top-4 text-[9px] font-black text-primary/40 pointer-events-none uppercase group-focus-within/lang:text-primary transition-colors">
+                  {lang.code}
+                </div>
+                <Textarea
+                  placeholder={`ENTER BODY CONTENT (${lang.name})...`}
+                  value={getLocalizedValue(item.text, lang.code)}
+                  onChange={(e) =>
+                    onChange({
+                      text: updateLocalizedValue(
+                        item.text,
+                        lang.code,
+                        e.target.value,
+                      ),
+                    })
+                  }
+                  className="min-h-[120px] bg-slate-50 border border-slate-100 text-[13px] font-bold text-slate-600 focus:border-primary/30 focus:bg-white transition-all rounded-2xl uppercase tracking-widest pl-12 pt-5 shadow-inner italic"
+                />
+              </div>
+            ))}
+          </div>
         );
 
       case "image":
         return (
-          <div className="space-y-4">
+          <div className="space-y-8">
             {!item.url ? (
-              <MediaLibraryModal 
-                onSelect={(m) => onChange({ url: m.url, alt: m.alt || item.alt })}
+              <MediaLibraryModal
+                onSelect={(m) =>
+                  onChange({ url: m.url, alt: m.alt || item.alt })
+                }
                 trigger={
-                  <Button variant="outline" className="w-full h-24 border-dashed border-slate-200 rounded-2xl flex flex-col gap-2 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all bg-slate-50/30">
-                    <ImageIcon size={20} />
-                    <span className="text-xs font-bold uppercase tracking-widest">Select Image</span>
+                  <Button
+                    variant="outline"
+                    className="w-full h-48 border-2 border-dashed border-slate-100 bg-slate-50 text-slate-400 font-black uppercase tracking-[0.3em] text-[11px] hover:text-primary hover:border-primary/30 transition-all rounded-[2rem] flex flex-col gap-5 italic shadow-inner active:scale-95"
+                  >
+                    <ImageIcon size={32} strokeWidth={2.5} className="text-primary opacity-40" />
+                    <span>Select Media Asset</span>
                   </Button>
                 }
               />
             ) : (
-              <div className="space-y-3">
-                <div className="relative group/img-preview rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center min-h-[160px] max-h-[300px]">
-                  <img src={item.url} alt={item.alt} className="w-full h-full object-contain" />
-                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/img-preview:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <MediaLibraryModal 
-                      onSelect={(m) => onChange({ url: m.url, alt: m.alt || item.alt })}
-                      trigger={
-                        <Button variant="secondary" size="sm" className="rounded-xl font-bold gap-2">
-                           <ImageIcon size={14} /> Change Image
-                        </Button>
-                      }
-                    />
-                    <Button 
-                      variant="destructive" 
-                      size="sm" 
-                      className="rounded-xl font-bold"
-                      onClick={() => onChange({ url: "", alt: "" })}
-                    >
-                      Remove
-                    </Button>
+              <div className="space-y-4">
+                <div className="relative group/img-preview border border-slate-100 bg-white rounded-[2.5rem] flex items-center justify-center min-h-[200px] max-h-[400px] overflow-hidden shadow-sm">
+                  <img
+                    src={item.url}
+                    alt={item.alt}
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/img-preview:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
+                    <div className="flex gap-4">
+                      <MediaLibraryModal
+                        onSelect={(m) =>
+                          onChange({ url: m.url, alt: m.alt || item.alt })
+                        }
+                        trigger={
+                          <Button className="h-12 bg-primary text-white px-8 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all italic hover:bg-slate-900 shadow-xl shadow-primary/20">
+                            <ImageIcon size={18} strokeWidth={2.5} className="mr-3" /> Update Media
+                          </Button>
+                        }
+                      />
+                      <Button
+                        variant="destructive"
+                        className="h-12 bg-white text-red-500 hover:bg-red-500 hover:text-white px-8 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all italic shadow-xl"
+                        onClick={() => onChange({ url: "", alt: "" })}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </div>
+                  {item.alt && activeLanguages.length > 0 && (
+                    <div className="space-y-4 p-8 bg-slate-50/50 rounded-[2rem] border border-slate-100 shadow-inner">
+                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] mb-4 flex items-center gap-4 italic ml-2">
+                        <Terminal size={14} strokeWidth={2.5} className="text-primary" /> Media Description (Alt Text)
+                      </p>
+                      {activeLanguages.map((lang) => (
+                        <div
+                          key={lang.code}
+                          className="flex items-center gap-4 group/lang"
+                        >
+                          <span className="text-[9px] font-black text-primary/30 w-6 uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </span>
+                          <Input
+                            placeholder={`ENTER ALT TEXT (${lang.name})...`}
+                            value={getLocalizedValue(item.alt, lang.code)}
+                            onChange={(e) =>
+                              onChange({
+                                alt: updateLocalizedValue(
+                                  item.alt,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                            className="h-10 bg-white border-slate-100 text-[11px] text-slate-900 font-bold rounded-xl shadow-sm italic uppercase tracking-widest focus:border-primary transition-all"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {item.alt && (
-                  <p className="text-[10px] text-slate-400 italic text-center font-medium">Alt: {item.alt}</p>
-                )}
               </div>
             )}
           </div>
         );
 
       case "button":
-        // Migration: convert single button to array if needed
-        const buttonItems = item.buttons || (item.label ? [{ id: 'migrated', label: item.label, link: item.link, actionType: 'link' }] : []);
-        
+        const buttonItems =
+          item.buttons ||
+          (item.label
+            ? [
+                {
+                  id: "migrated",
+                  label: item.label,
+                  link: item.link,
+                  actionType: "link",
+                },
+              ]
+            : []);
+
         return (
-          <div className="space-y-3">
-             {buttonItems.map((btn: any, idx: number) => (
-                <div key={idx} className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-4 relative group/btn">
-                  <div className="flex items-center justify-between border-b border-slate-100/50 pb-2 mb-2">
-                    <div className="flex items-center gap-3">
-                       <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Button #{idx + 1}</span>
-                       <Select
-                          value={btn.actionType || "link"}
-                          onValueChange={(val) => {
-                            const newButtons = [...buttonItems];
-                            newButtons[idx] = { ...btn, actionType: val };
-                            onChange({ buttons: newButtons, label: undefined, link: undefined });
-                          }}
-                        >
-                          <SelectTrigger className="w-[100px] h-7 text-[9px] font-bold rounded-lg px-2">
-                            <SelectValue placeholder="Action" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="link">🔗 Link</SelectItem>
-                            <SelectItem value="button">⚡ Button</SelectItem>
-                          </SelectContent>
-                        </Select>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-6 text-slate-300 hover:text-rose-500 rounded-lg"
-                      onClick={() => {
-                        const newButtons = buttonItems.filter((_: any, i: number) => i !== idx);
-                        onChange({ buttons: newButtons, label: undefined, link: undefined });
+          <div className="space-y-4">
+            {buttonItems.map((btn: any, idx: number) => (
+              <div
+                key={idx}
+                className="bg-slate-50 border border-slate-100 p-6 space-y-6 relative group/btn rounded-2xl shadow-inner"
+              >
+                <div className="flex items-center justify-between border-b border-slate-200/50 pb-4 mb-2">
+                  <div className="flex items-center gap-5">
+                    <span className="px-4 py-1.5 bg-primary text-[10px] font-black uppercase text-white rounded-lg italic tracking-widest">
+                      Interaction #{idx + 1}
+                    </span>
+                    <Select
+                      value={btn.actionType || "link"}
+                      onValueChange={(val) => {
+                        const newButtons = [...buttonItems];
+                        newButtons[idx] = { ...btn, actionType: val };
+                        onChange({
+                          buttons: newButtons,
+                          label: undefined,
+                          link: undefined,
+                        });
                       }}
                     >
-                      <Trash size={12} />
-                    </Button>
+                      <SelectTrigger className="w-[160px] h-10 bg-white border-slate-100 text-[10px] font-black text-slate-900 uppercase tracking-widest rounded-xl shadow-sm italic px-4">
+                        <SelectValue placeholder="Action" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-slate-100 text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-2xl p-2 italic">
+                        <SelectItem value="link" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">Navigation Path</SelectItem>
+                        <SelectItem value="button" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">Action Event</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                    onClick={() => {
+                      const newButtons = buttonItems.filter(
+                        (_: any, i: number) => i !== idx,
+                      );
+                      onChange({
+                        buttons: newButtons,
+                        label: undefined,
+                        link: undefined,
+                      });
+                    }}
+                  >
+                    <Trash size={18} strokeWidth={2.5} />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                      Button Label
+                    </label>
+                    <div className="space-y-3">
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 pointer-events-none uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </div>
+                          <Input
+                            placeholder={`LABEL (${lang.name})...`}
+                            value={getLocalizedValue(btn.label, lang.code)}
+                            onChange={(e) => {
+                              const newButtons = [...buttonItems];
+                              newButtons[idx] = {
+                                ...btn,
+                                label: updateLocalizedValue(
+                                  btn.label,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              };
+                              onChange({
+                                buttons: newButtons,
+                                label: undefined,
+                                link: undefined,
+                              });
+                            }}
+                            className="h-10 bg-white border border-slate-100 text-[11px] text-slate-900 font-black uppercase tracking-widest rounded-xl focus:border-primary/30 transition-all pl-12 shadow-sm italic"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Label</label>
+                  {btn.actionType === "link" ? (
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        Destination URL (href)
+                      </label>
                       <Input
-                        placeholder="Click here"
-                        value={btn.label || ""}
+                        placeholder="e.g. /services/consulting"
+                        value={btn.link || ""}
                         onChange={(e) => {
                           const newButtons = [...buttonItems];
-                          newButtons[idx] = { ...btn, label: e.target.value };
-                          onChange({ buttons: newButtons, label: undefined, link: undefined });
+                          newButtons[idx] = { ...btn, link: e.target.value };
+                          onChange({
+                            buttons: newButtons,
+                            label: undefined,
+                            link: undefined,
+                          });
                         }}
-                        className="h-9 text-xs border-slate-200 rounded-lg font-bold"
+                        className="h-12 bg-white border border-slate-100 text-[12px] text-slate-900 font-bold rounded-xl focus:border-primary/30 transition-all shadow-sm italic px-6"
                       />
                     </div>
-
-                    {btn.actionType === "link" ? (
-                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Link URL (href)</label>
-                        <Input
-                          placeholder="/shop"
-                          value={btn.link || ""}
-                          onChange={(e) => {
-                            const newButtons = [...buttonItems];
-                            newButtons[idx] = { ...btn, link: e.target.value };
-                            onChange({ buttons: newButtons, label: undefined, link: undefined });
-                          }}
-                          className="h-9 text-xs border-slate-200 rounded-lg"
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Button Type</label>
-                        <Select
-                          value={btn.buttonType || "button"}
-                          onValueChange={(val) => {
-                            const newButtons = [...buttonItems];
-                            newButtons[idx] = { ...btn, buttonType: val };
-                            onChange({ buttons: newButtons, label: undefined, link: undefined });
-                          }}
-                        >
-                          <SelectTrigger className="h-9 text-xs border-slate-200 rounded-lg">
-                            <SelectValue placeholder="Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="button">Standard Button</SelectItem>
-                            <SelectItem value="submit">Submit Form</SelectItem>
-                            <SelectItem value="reset">Reset Form</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-
-                  {btn.actionType === "link" && (
-                    <div className="flex items-center gap-3 pt-1">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Open in:</label>
+                  ) : (
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        Interaction Type
+                      </label>
                       <Select
-                        value={btn.target || "_self"}
+                        value={btn.buttonType || "button"}
                         onValueChange={(val) => {
                           const newButtons = [...buttonItems];
-                          newButtons[idx] = { ...btn, target: val };
-                          onChange({ buttons: newButtons, label: undefined, link: undefined });
+                          newButtons[idx] = { ...btn, buttonType: val };
+                          onChange({
+                            buttons: newButtons,
+                            label: undefined,
+                            link: undefined,
+                          });
                         }}
                       >
-                        <SelectTrigger className="w-[140px] h-7 text-[9px] font-bold rounded-lg px-2">
-                          <SelectValue placeholder="Target" />
+                        <SelectTrigger className="h-12 bg-white border border-slate-100 text-[12px] text-slate-900 font-black uppercase tracking-widest rounded-xl italic px-6 shadow-sm">
+                          <SelectValue placeholder="TYPE" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="_self">Same Window</SelectItem>
-                          <SelectItem value="_blank">New Window</SelectItem>
+                        <SelectContent className="bg-white border-slate-100 text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-2xl p-2 italic">
+                          <SelectItem value="button" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">
+                            Standard Button
+                          </SelectItem>
+                          <SelectItem value="submit" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">Submit Form</SelectItem>
+                          <SelectItem value="reset" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">Reset Form</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   )}
                 </div>
-             ))}
-
-             <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full text-[10px] h-9 border-dashed border-slate-200 text-slate-400 hover:text-slate-600 rounded-xl gap-2"
-                onClick={() => {
-                  const newButtons = [...buttonItems, { id: Math.random().toString(36).substr(2, 9), label: "New Button", actionType: "link", link: "#" }];
-                  onChange({ buttons: newButtons, label: undefined, link: undefined });
-                }}
-              >
-                <PlusCircle size={14} /> Add Button
-              </Button>
-          </div>
-        );
-
-      case "cta":
-        return (
-          <div className="space-y-3 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Title</label>
-                <Input value={item.title || ""} onChange={(e) => onChange({ title: e.target.value })} className="h-8 text-xs border-slate-200" />
-              </div>
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Subtitle</label>
-                <Input value={item.subtitle || ""} onChange={(e) => onChange({ subtitle: e.target.value })} className="h-8 text-xs border-slate-200" />
-              </div>
-            </div>
-            <Textarea placeholder="CTA Description" value={item.description || ""} onChange={(e) => onChange({ description: e.target.value })} className="text-xs h-16 min-h-[60px] border-slate-200" />
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Button Text</label>
-                <Input value={item.buttonLabel || ""} onChange={(e) => onChange({ buttonLabel: e.target.value })} className="h-8 text-xs border-slate-200" />
-              </div>
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Button Link</label>
-                <Input value={item.buttonLink || ""} onChange={(e) => onChange({ buttonLink: e.target.value })} className="h-8 text-xs border-slate-200" />
-              </div>
-            </div>
-          </div>
-        );
-
-      case "cards":
-        return (
-          <div className="space-y-3">
-            {(item.items || []).map((card: any, idx: number) => (
-              <div key={idx} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100 relative group/card">
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100/50">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-300">Card Item #{idx + 1}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg" 
-                    onClick={() => {
-                      const newItems = item.items.filter((_: any, i: number) => i !== idx);
-                      onChange({ items: newItems });
-                    }}
-                  >
-                    <Trash size={12} />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <Input placeholder="Title" value={card.title || ""} onChange={(e) => {
-                    const newItems = [...item.items];
-                    newItems[idx] = { ...card, title: e.target.value };
-                    onChange({ items: newItems });
-                  }} className="h-8 text-[11px] font-bold border-slate-200" />
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                       <label className="text-[10px] font-bold text-slate-500">Image URL</label>
-                       <MediaLibraryModal onSelect={(m) => {
-                          const newItems = [...item.items];
-                          newItems[idx] = { ...card, image: m.url };
-                          onChange({ items: newItems });
-                       }} />
-                    </div>
-                    <Input placeholder="Image URL" value={card.image || ""} onChange={(e) => {
-                      const newItems = [...item.items];
-                      newItems[idx] = { ...card, image: e.target.value };
-                      onChange({ items: newItems });
-                    }} className="h-8 text-[11px] border-slate-200 rounded-lg" />
-                  </div>
-                </div>
-                <Textarea placeholder="Description" value={card.description || ""} onChange={(e) => {
-                  const newItems = [...item.items];
-                  newItems[idx] = { ...card, description: e.target.value };
-                  onChange({ items: newItems });
-                }} className="text-[11px] h-14 min-h-[50px] border-slate-200" />
               </div>
             ))}
-            <Button variant="outline" size="sm" className="w-full text-[10px] h-8 border-dashed border-slate-200 text-slate-400 hover:text-slate-600 rounded-xl" onClick={() => {
-              const newItems = [...(item.items || []), { title: "", description: "", image: "", link: "" }];
-              onChange({ items: newItems });
-            }}>+ Add Card</Button>
-          </div>
-        );
 
-      case "features":
-        return (
-          <div className="space-y-3">
-            {(item.items || []).map((feature: any, idx: number) => (
-              <div key={idx} className="flex gap-2 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100 group/feat">
-                <div className="flex-1 space-y-2">
-                  <Input placeholder="Feature Title" value={feature.title || ""} onChange={(e) => {
-                    const newItems = [...item.items];
-                    newItems[idx] = { ...feature, title: e.target.value };
-                    onChange({ items: newItems });
-                  }} className="h-8 text-[11px] font-bold border-slate-200" />
-                  <Textarea placeholder="Feature description" value={feature.description || ""} onChange={(e) => {
-                    const newItems = [...item.items];
-                    newItems[idx] = { ...feature, description: e.target.value };
-                    onChange({ items: newItems });
-                  }} className="text-[11px] h-14 min-h-[50px] border-slate-200" />
-                </div>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-rose-500 rounded-lg flex-shrink-0" onClick={() => {
-                  const newItems = item.items.filter((_: any, i: number) => i !== idx);
-                  onChange({ items: newItems });
-                }}><Trash size={12} /></Button>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" className="text-[10px] h-8 border-dashed border-slate-200 text-slate-400 hover:text-slate-600 rounded-xl" onClick={() => {
-              const newItems = [...(item.items || []), { title: "", description: "" }];
-              onChange({ items: newItems });
-            }}>+ Add Feature</Button>
-          </div>
-        );
-
-      case "testimonial":
-        return (
-          <div className="space-y-3 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-            <Textarea placeholder="Quote" value={item.quote || ""} onChange={(e) => onChange({ quote: e.target.value })} className="text-sm italic border-slate-200" />
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Author Name</label>
-                <Input value={item.author || ""} onChange={(e) => onChange({ author: e.target.value })} className="h-8 text-xs border-slate-200" />
-              </div>
-              <div>
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 block">Role/Company</label>
-                <Input value={item.role || ""} onChange={(e) => onChange({ role: e.target.value })} className="h-8 text-xs border-slate-200" />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Avatar URL</label>
-                 <MediaLibraryModal onSelect={(m) => onChange({ avatar: m.url })} />
-              </div>
-              <Input value={item.avatar || ""} onChange={(e) => onChange({ avatar: e.target.value })} className="h-8 text-xs border-slate-200 rounded-lg" />
-            </div>
-          </div>
-        );
-
-      case "list":
-        return (
-          <div className="space-y-2">
-            {(item.items || []).map((li: string, idx: number) => (
-              <div key={idx} className="flex gap-2">
-                <Input
-                  value={li}
-                  placeholder={`Item ${idx + 1}`}
-                  onChange={(e) => {
-                    const newItems = [...(item.items || [])];
-                    newItems[idx] = e.target.value;
-                    onChange({ items: newItems });
-                  }}
-                  className="h-8 text-xs border-slate-200"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-slate-200 hover:text-rose-500 rounded-lg flex-shrink-0"
-                  onClick={() => {
-                    const newItems = (item.items || []).filter((_: any, i: number) => i !== idx);
-                    onChange({ items: newItems });
-                  }}
-                >
-                  <Trash size={12} />
-                </Button>
-              </div>
-            ))}
             <Button
               variant="outline"
-              size="sm"
-              className="text-[10px] h-8 border-dashed border-slate-200 text-slate-400 hover:text-slate-600 rounded-xl"
+              className="w-full py-6 border-dashed border-slate-200 bg-white text-slate-400 font-black uppercase tracking-[0.3em] text-[11px] hover:text-primary hover:border-primary/30 transition-all rounded-2xl gap-4 italic shadow-sm active:scale-95"
               onClick={() => {
-                const newItems = [...(item.items || []), ""];
-                onChange({ items: newItems });
+                const newButtons = [
+                  ...buttonItems,
+                  {
+                    id: Math.random().toString(36).substr(2, 9),
+                    label: "ACTION",
+                    actionType: "link",
+                    link: "#",
+                  },
+                ];
+                onChange({
+                  buttons: newButtons,
+                  label: undefined,
+                  link: undefined,
+                });
               }}
             >
-              + Add List Item
+              <PlusCircle size={20} className="text-primary" strokeWidth={2.5} /> Add Secondary Interaction
             </Button>
           </div>
         );
 
+      case "cta":
+        case "cta":
+          return (
+            <div className="space-y-8 bg-slate-50 border border-slate-100 p-8 rounded-2xl shadow-inner italic">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        Main Heading
+                      </label>
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </span>
+                          <Input
+                            value={getLocalizedValue(item.title, lang.code)}
+                            onChange={(e) =>
+                              onChange({
+                                title: updateLocalizedValue(
+                                  item.title,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                            className="h-10 bg-white border border-slate-100 text-[11px] text-slate-900 font-black uppercase tracking-widest pl-12 rounded-xl shadow-sm italic focus:border-primary transition-all"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        Secondary Heading
+                      </label>
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </span>
+                          <Input
+                            value={getLocalizedValue(item.subtitle, lang.code)}
+                            onChange={(e) =>
+                              onChange({
+                                subtitle: updateLocalizedValue(
+                                  item.subtitle,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                            className="h-10 bg-white border border-slate-100 text-[11px] text-slate-900 font-black uppercase tracking-widest pl-12 rounded-xl shadow-sm italic focus:border-primary transition-all"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                      Content Description
+                    </label>
+                    <div className="space-y-4">
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <span className="absolute left-4 top-4 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </span>
+                          <Textarea
+                            placeholder={`SYSTEM SUMMARY (${lang.name})...`}
+                            value={getLocalizedValue(item.description, lang.code)}
+                            onChange={(e) =>
+                              onChange({
+                                description: updateLocalizedValue(
+                                  item.description,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                            className="bg-white border border-slate-100 text-[12px] text-slate-600 font-bold min-h-[100px] pl-12 pt-4 rounded-2xl shadow-sm italic focus:border-primary transition-all"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        CTA Button Label
+                      </label>
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </span>
+                          <Input
+                            value={getLocalizedValue(item.buttonLabel, lang.code)}
+                            onChange={(e) =>
+                              onChange({
+                                buttonLabel: updateLocalizedValue(
+                                  item.buttonLabel,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              })
+                            }
+                            className="h-10 bg-white border border-slate-100 text-[11px] text-slate-900 font-black uppercase tracking-widest pl-12 rounded-xl shadow-sm italic focus:border-primary transition-all"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        Destination URL
+                      </label>
+                      <Input
+                        value={item.buttonLink || ""}
+                        onChange={(e) => onChange({ buttonLink: e.target.value })}
+                        placeholder="e.g. /contact-us"
+                        className="h-12 bg-white border border-slate-100 text-[12px] text-slate-900 font-bold rounded-xl shadow-sm px-6 italic focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ); case "cards": return (
+            <div className="space-y-8">
+              {(item.items || []).map((card: any, idx: number) => (
+                <div
+                  key={idx}
+                  className="bg-slate-50 border border-slate-100 p-8 rounded-3xl relative group/card shadow-inner italic"
+                >
+                  <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200/50">
+                    <span className="px-5 py-1.5 bg-primary text-[10px] font-black uppercase tracking-widest text-white rounded-lg italic">
+                      Content Block #{idx + 1}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                      onClick={() => {
+                        const newItems = item.items.filter(
+                          (_: any, i: number) => i !== idx,
+                        );
+                        onChange({ items: newItems });
+                      }}
+                    >
+                      <Trash size={18} strokeWidth={2.5} />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                        Block Title
+                      </label>
+                      <div className="space-y-3">
+                        {activeLanguages.map((lang) => (
+                          <div key={lang.code} className="relative group/lang">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                              {lang.code}
+                            </span>
+                            <Input
+                              placeholder={`TITLE (${lang.name})...`}
+                              value={getLocalizedValue(card.title, lang.code)}
+                              onChange={(e) => {
+                                const newItems = [...item.items];
+                                newItems[idx] = {
+                                  ...card,
+                                  title: updateLocalizedValue(
+                                    card.title,
+                                    lang.code,
+                                    e.target.value,
+                                  ),
+                                };
+                                onChange({ items: newItems });
+                              }}
+                              className="h-10 bg-white border border-slate-100 text-[11px] font-black text-slate-900 uppercase tracking-widest pl-12 rounded-xl shadow-sm italic focus:border-primary transition-all"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between ml-2">
+                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic">
+                          Media Mapping
+                        </label>
+                        <MediaLibraryModal
+                          onSelect={(m) => {
+                            const newItems = [...item.items];
+                            newItems[idx] = { ...card, image: m.url };
+                            onChange({ items: newItems });
+                          }}
+                          trigger={
+                            <Button variant="link" className="h-auto p-0 text-[10px] font-black uppercase tracking-widest text-primary italic hover:text-slate-900">
+                              Open Library
+                            </Button>
+                          }
+                        />
+                      </div>
+                      <Input
+                        placeholder="HTTPS://MEDIA-REPOSITORY.COM..."
+                        value={card.image || ""}
+                        onChange={(e) => {
+                          const newItems = [...item.items];
+                          newItems[idx] = { ...card, image: e.target.value };
+                          onChange({ items: newItems });
+                        }}
+                        className="h-12 bg-white border border-slate-100 text-[12px] font-bold text-slate-900 rounded-xl px-6 italic shadow-sm focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 block italic ml-2">
+                      Component Information
+                    </label>
+                    <div className="space-y-4">
+                      {activeLanguages.map((lang) => (
+                        <div key={lang.code} className="relative group/lang">
+                          <span className="absolute left-4 top-4 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                            {lang.code}
+                          </span>
+                          <Textarea
+                            placeholder={`BLOCK SUMMARY (${lang.name})...`}
+                            value={getLocalizedValue(
+                              card.description,
+                              lang.code,
+                            )}
+                            onChange={(e) => {
+                              const newItems = [...item.items];
+                              newItems[idx] = {
+                                ...card,
+                                description: updateLocalizedValue(
+                                  card.description,
+                                  lang.code,
+                                  e.target.value,
+                                ),
+                              };
+                              onChange({ items: newItems });
+                            }}
+                            className="bg-white border border-slate-100 text-[12px] text-slate-600 font-bold min-h-[100px] pl-12 pt-4 rounded-2xl shadow-sm italic focus:border-primary transition-all"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                className="w-full py-6 border-dashed border-slate-200 bg-white text-slate-400 font-black uppercase tracking-[0.3em] text-[11px] hover:text-primary hover:border-primary/30 transition-all rounded-2xl gap-4 italic shadow-sm active:scale-95"
+                onClick={() => {
+                  const newItems = [
+                    ...(item.items || []),
+                    {
+                      id: Math.random().toString(36).substr(2, 9),
+                      title: { [defaultLang]: "NEW COMPONENT" },
+                      description: { [defaultLang]: "" },
+                      image: "",
+                      link: "",
+                    },
+                  ];
+                  onChange({ items: newItems });
+                }}
+              >
+                <PlusCircle size={20} className="text-primary" strokeWidth={2.5} /> Add New Content Block
+              </Button>
+            </div>
+            ); case "list": return (
+            <div className="space-y-4">
+              {(item.items || []).map((li: any, idx: number) => (
+                <div
+                  key={idx}
+                  className="bg-slate-50 border border-slate-100 p-5 space-y-4 relative rounded-2xl shadow-inner italic"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-4">
+                      <PlusCircle size={14} strokeWidth={2.5} className="text-primary" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+                        Sub-Feature #{idx + 1}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                      onClick={() => {
+                        const newItems = (item.items || []).filter(
+                          (_: any, i: number) => i !== idx,
+                        );
+                        onChange({ items: newItems });
+                      }}
+                    >
+                      <Trash size={16} strokeWidth={2.5} />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {activeLanguages.map((lang) => (
+                      <div key={lang.code} className="relative group/lang">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-primary/40 uppercase group-focus-within/lang:text-primary transition-colors">
+                          {lang.code}
+                        </span>
+                        <Input
+                          value={getLocalizedValue(li, lang.code)}
+                          placeholder={`ENTER CONTENT ITEM (${lang.name})...`}
+                          onChange={(e) => {
+                            const newItems = [...(item.items || [])];
+                            newItems[idx] = updateLocalizedValue(
+                              li,
+                              lang.code,
+                              e.target.value,
+                            );
+                            onChange({ items: newItems });
+                          }}
+                          className="h-10 bg-white border border-slate-100 text-[11px] font-bold text-slate-900 rounded-xl shadow-sm italic focus:border-primary/30 transition-all uppercase tracking-widest pl-12"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+            ))}
+              <Button
+                variant="outline"
+                className="w-full py-5 border-dashed border-slate-200 bg-white text-slate-400 font-black uppercase tracking-[0.3em] text-[10px] hover:text-primary hover:border-primary/30 transition-all rounded-2xl gap-3 italic shadow-sm active:scale-95"
+                onClick={() => {
+                  const newItems = [...(item.items || []), "NEW CONTENT ITEM"];
+                  onChange({ items: newItems });
+                }}
+              >
+                <PlusCircle size={18} className="text-primary" strokeWidth={2.5} /> Add Sub-Feature
+              </Button>
+            </div>
+        );
+
       default:
-        return <div className="text-xs text-slate-400 italic">Unknown component type</div>;
+        return (
+          <div className="flex items-center gap-4 p-6 bg-red-50 border border-red-100 text-red-500 rounded-2xl shadow-sm italic">
+            <ShieldCheck size={20} strokeWidth={2.5} />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">
+              UNKNOWN COMPONENT TYPE: SYSTEM ERROR
+            </span>
+          </div>
+        );
     }
   };
 
   const getIcon = () => {
     switch (item.type) {
-      case "heading": return <Type size={14} />;
-      case "paragraph": return <AlignLeft size={14} />;
-      case "image": return <ImageIcon size={14} />;
-      case "button": return <LinkIcon size={14} />;
-      case "list": return <List size={14} />;
-      case "section": return <Layers size={14} />;
-      case "cta": return <Zap size={14} />;
-      case "cards": return <CreditCard size={14} />;
-      case "features": return <Zap size={14} />;
-      case "testimonial": return <Quote size={14} />;
-      case "carousel": return <GalleryHorizontal size={14} />;
-      default: return <FileText size={14} />;
+      case "heading":
+        return <Type size={18} />;
+      case "paragraph":
+        return <AlignLeft size={18} />;
+      case "image":
+        return <ImageIcon size={18} />;
+      case "button":
+        return <LinkIcon size={18} />;
+      case "list":
+        return <List size={18} />;
+      case "section":
+        return <Layers size={18} />;
+      case "cta":
+        return <Zap size={18} />;
+      case "cards":
+        return <CreditCard size={18} />;
+      case "features":
+        return <Zap size={18} />;
+      case "testimonial":
+        return <Quote size={18} />;
+      case "carousel":
+        return <GalleryHorizontal size={18} />;
+      default:
+        return <FileText size={18} />;
     }
   };
 
@@ -557,51 +995,96 @@ export const ContentItem: React.FC<ContentItemProps> = ({
   }
 
   return (
-    <div className="group relative bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:border-slate-300 transition-all">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-slate-50 rounded-lg text-slate-400">
-            {getIcon()}
+    <div
+      className={cn(
+        "group relative bg-white border border-slate-100 rounded-[2.5rem] p-6 transition-all hover:border-primary/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]",
+        !isExpanded && "p-4",
+      )}
+    >
+      <div
+        className={cn(
+          "flex flex-wrap items-center justify-between gap-6 transition-all",
+          isExpanded
+            ? "mb-8 pb-6 border-b border-slate-50"
+            : "mb-0 pb-0 border-b-0",
+        )}
+      >
+        <div
+          className="flex items-center gap-5 flex-1 cursor-pointer select-none"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className={cn(
+                "transition-transform duration-300",
+                isExpanded ? "rotate-0" : "-rotate-90",
+              )}
+            >
+              <ChevronDown size={18} strokeWidth={2.5} className="text-primary opacity-40" />
+            </div>
+            <div className="p-3 bg-slate-50 border border-slate-100 text-primary rounded-2xl group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
+              {getIcon()}
+            </div>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            {item.type}
-          </span>
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex items-center gap-3">
+              <span className="text-[12px] font-black uppercase tracking-[0.4em] text-slate-900 whitespace-nowrap italic">
+                {item.type} Component
+              </span>
+              {!isExpanded && (
+                <span className="text-[10px] font-bold text-slate-400 truncate italic">
+                  — {getPreviewText()}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-1.5 opacity-40">
+              <Activity size={10} strokeWidth={2.5} className="text-primary" />
+              <span className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em] italic">
+                ID: {item.id}
+              </span>
+            </div>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-slate-50 rounded-xl border border-slate-100 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-slate-50 border border-slate-100 p-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0 rounded-xl shadow-inner">
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white"
+              className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-white transition-all rounded-lg"
               onClick={onMoveUp}
               disabled={isFirst}
             >
-              <ChevronUp size={12} />
+              <ChevronUp size={18} strokeWidth={2.5} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white"
+              className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-white transition-all rounded-lg"
               onClick={onMoveDown}
               disabled={isLast}
             >
-              <ChevronDown size={12} />
+              <ChevronDown size={18} strokeWidth={2.5} />
             </Button>
           </div>
-          
+
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50"
+            className="h-11 w-11 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all rounded-xl border border-transparent hover:border-red-100 shadow-sm"
             onClick={onRemove}
           >
-            <Trash size={14} />
+            <Trash size={20} strokeWidth={2.5} />
           </Button>
         </div>
       </div>
 
-      <div className="pl-0">{renderFields()}</div>
+      {isExpanded && (
+        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+          {renderFields()}
+          <div className="absolute -left-8 top-0 bottom-0 w-1 bg-gold/10 group-hover:bg-gold/40 transition-colors" />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AttributeSetRecord } from "./attributeSlices";
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 interface ApiError {
   message: string;
   status?: number;
@@ -17,7 +20,12 @@ export const fetchAttributes = createAsyncThunk<
   { rejectValue: ApiError }
 >("attributes/fetchAttributes", async (_, { rejectWithValue }) => {
   try {
-    const res = await fetch("/api/ecommerce/attributes");
+    const res = await fetch(`${API_BASE_URL}/commerce/attributes`, {
+      headers: {
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
+    });
     const data = await res.json();
     if (!res.ok) {
       return rejectWithValue({
@@ -39,9 +47,13 @@ export const createAttributeSet = createAsyncThunk<
   { rejectValue: ApiError }
 >("attributes/createAttributeSet", async (payload, { rejectWithValue }) => {
   try {
-    const res = await fetch("/api/ecommerce/attributes", {
+    const res = await fetch(`${API_BASE_URL}/commerce/attributes`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
       body: JSON.stringify(payload),
     });
     const data = await res.json();
@@ -67,9 +79,13 @@ export const updateAttributeSet = createAsyncThunk<
   "attributes/updateAttributeSet",
   async ({ id, payload }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`/api/ecommerce/attributes?id=${id}`, {
+      const res = await fetch(`${API_BASE_URL}/commerce/attributes/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -99,6 +115,11 @@ export const deleteAttributeSet = createAsyncThunk<
   try {
     const res = await fetch(`/api/ecommerce/attributes?id=${id}`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
     });
     const data = await res.json();
     if (!res.ok) {
@@ -115,7 +136,6 @@ export const deleteAttributeSet = createAsyncThunk<
   }
 });
 
-
 export const bulkImportAttributes = createAsyncThunk<
   ApiResponse<any>,
   any[],
@@ -124,7 +144,11 @@ export const bulkImportAttributes = createAsyncThunk<
   try {
     const res = await fetch("/api/ecommerce/attributes/bulk", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
       body: JSON.stringify(attributes),
     });
     const data = await res.json();
@@ -141,3 +165,4 @@ export const bulkImportAttributes = createAsyncThunk<
     });
   }
 });
+

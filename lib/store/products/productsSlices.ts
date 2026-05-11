@@ -191,11 +191,11 @@ const productsSlice = createSlice({
       })
       .addCase(saveProduct.fulfilled, (state, action) => {
         state.saving = false;
-        if (!action.payload.id) {
+        if (!action.payload.editingId) {
           state.allProducts.push(action.payload.data);
         } else {
           state.allProducts = state.allProducts.map((product) =>
-            product._id === action.payload.id ? action.payload.data : product,
+            product._id === action.payload.editingId ? action.payload.data : product,
           );
         }
       })

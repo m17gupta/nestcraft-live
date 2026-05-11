@@ -1,5 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const fetchProducts = createAsyncThunk(
   "products/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -16,6 +19,8 @@ export const fetchProducts = createAsyncThunk(
       );
       if (!response.ok) throw new Error("Failed to fetch products");
       const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to fetch products");
       return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -25,13 +30,32 @@ export const fetchProducts = createAsyncThunk(
 
 export const fetchProductsByCategory = createAsyncThunk(
   "products/fetchByCategory",
-  async (category: string, { rejectWithValue }) => {
+  async (
+    {
+      category,
+      filters,
+    }: {
+      category: string;
+      filters: any;
+    },
+    { rejectWithValue },
+  ) => {
     try {
+      const parmas = new URLSearchParams(filters);
+
       const response = await fetch(
-        `/api/ecommerce/products?category=${category}&status=active`,
+        `${API_BASE_URL}/commerce/products?category=${category}&${parmas.toString()}`,
+        {
+          headers: {
+            "x-tenant-db": tenantHeader || "",
+          },
+          credentials: "include",
+        },
       );
-      if (!response.ok) throw new Error("Failed to fetch products");
       const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to fetch products");
+
       return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -43,17 +67,21 @@ export const fetchProductById = createAsyncThunk(
   "products/fetchById",
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/ecommerce/products/${id}`);
-      if (!response.ok) throw new Error("Failed to fetch product");
+      const response = await fetch(`${API_BASE_URL}/commerce/products/${id}`, {
+        headers: {
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
+      });
       const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to fetch product");
       return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
   },
 );
-
-
 
 export const saveProduct = createAsyncThunk(
   "products/save",
@@ -63,22 +91,27 @@ export const saveProduct = createAsyncThunk(
   ) => {
     try {
       const endpoint = id
-        ? `/api/ecommerce/products?id=${id}`
-        : "/api/ecommerce/products";
+        ? `${API_BASE_URL}/commerce/products/${id}`
+        : `${API_BASE_URL}/commerce/products`;
       const method = id ? "PUT" : "POST";
 
       const response = await fetch(endpoint, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to save product");
+        throw new Error(data.message || data.error || "Failed to save product");
       }
 
-      return await response.json();
+      return { data: data.data, editingId: id };
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -89,11 +122,17 @@ export const deleteProduct = createAsyncThunk(
   "products/delete",
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/ecommerce/products?id=${id}`, {
+      const response = await fetch(`${API_BASE_URL}/commerce/products/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
       });
-      if (!response.ok) throw new Error("Failed to delete product");
       const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to delete product");
       return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -105,16 +144,22 @@ export const bulkImportProducts = createAsyncThunk(
   "products/bulkImport",
   async (products: any[], { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/ecommerce/products/bulk", {
+      const response = await fetch(`${API_BASE_URL}/commerce/products/bulk`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
         body: JSON.stringify(products),
       });
-      if (!response.ok) throw new Error("Failed to import products");
       const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to import products");
       return data;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
   },
 );
+

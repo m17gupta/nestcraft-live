@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 interface AdminAttributesState {
   items: any[];
   loading: boolean;
@@ -15,7 +18,12 @@ const initialState: AdminAttributesState = {
 export const fetchAttributes = createAsyncThunk(
   'adminAttributes/fetchAttributes',
   async () => {
-    const response = await fetch('/api/ecommerce/attributes');
+    const response = await fetch(`${API_BASE_URL}/commerce/attributes`, {
+      headers: {
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch attributes');
     }
@@ -23,6 +31,7 @@ export const fetchAttributes = createAsyncThunk(
     return Array.isArray(data) ? data : [];
   }
 );
+
 
 const adminAttributesSlice = createSlice({
   name: 'adminAttributes',

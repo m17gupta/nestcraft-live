@@ -41,7 +41,7 @@ const getSection = (content: any, adminTitle: string) =>
   Array.isArray(content) ? content.find(s => s?.adminTitle === adminTitle) : undefined;
 
 const HomePage = ({ data }: HomePageProps) => {
-  const { nestCraftUser } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const { currentPages } = useSelector((state: RootState) => state.pages);
   
@@ -59,7 +59,7 @@ const HomePage = ({ data }: HomePageProps) => {
   return (
     <>
       {/* commentsS Plugin */}
-      {nestCraftUser?.role == "admin" && <AnnotatorPlugin />}
+      {user?.role == "admin" && <AnnotatorPlugin />}
 
       {/* get all page from the database */}
       <GetAllPages />

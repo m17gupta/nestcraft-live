@@ -1,542 +1,3 @@
-// "use client";
-
-// import React, { useEffect, useState } from "react";
-// import { motion, AnimatePresence } from "motion/react";
-// import {
-//   Upload,
-//   Link2,
-//   X,
-//   Search,
-//   Image as ImageIcon,
-//   Clock,
-// } from "lucide-react";
-
-// export const MediaUploader = () => {
-//   const [activeTab, setActiveTab] = useState<string>("upload");
-//   const [uploadMethod, setUploadMethod] = useState<string>("file");
-//   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
-//   const [mediaLibrary, setMediaLibrary] = useState<any[]>([]);
-//   const [urlInput, setUrlInput] = useState("");
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [selectedMedia, setSelectedMedia] = useState<any>(null);
-
-//   const handleFileSelect = (e: any) => {
-//     const files = Array.from(e.target.files);
-//     const fileObjects = files.map((file: any) => ({
-//       file,
-//       filename: file.name,
-//       alt: "",
-//       preview: URL.createObjectURL(file),
-//       size: (file.size / 1024).toFixed(0) + " KB",
-//       foldername: "",
-//       type: "image",
-//     }));
-//     setSelectedFiles([...selectedFiles, ...fileObjects]);
-//   };
-
-//   const handleDrop = (e: any) => {
-//     e.preventDefault();
-//     const files = Array.from(e.dataTransfer.files);
-//     const fileObjects = files.map((file: any) => ({
-//       file,
-//       filename: file.name,
-//       alt: "",
-//       preview: URL.createObjectURL(file),
-//       size: (file.size / 1024).toFixed(0) + " KB",
-//       foldername: "",
-//       type: "image",
-//     }));
-//     setSelectedFiles([...selectedFiles, ...fileObjects]);
-//   };
-
-//   const updateFileMetadata = (index: number, field: string, value: string) => {
-//     const updated = [...selectedFiles];
-//     updated[index][field] = value;
-//     setSelectedFiles(updated);
-//   };
-
-//   const removeFile = (index: number) => {
-//     setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
-//   };
-
-//   const handleUpload = async () => {
-//     const newMedia = selectedFiles.map((file: any, idx: number) => ({
-//       id: mediaLibrary.length + idx + 1,
-//       filename: file.filename,
-//       url: file.preview,
-//       alt: file.alt || file.filename,
-//       file: file.file,
-//       foldername: file.foldername ? file.foldername : "Uncategorized",
-//       type: file.type,
-//     }));
-
-//     const formData: any = new FormData();
-//     for (let i of newMedia) {
-//       formData.append("files", i.file);
-//       formData.append("name", i.filename);
-//       formData.append("altText", i.alt);
-//       formData.append("foldername", i.foldername);
-//     }
-
-//     try {
-//       const response = await fetch("/api/admin/media", {
-//         method: "POST",
-//         body: formData,
-//       });
-//       const data = await response.json();
-//       if (data.success) {
-//         console.log(data.data);
-//         setMediaLibrary([...data.data, ...mediaLibrary]);
-//         setSelectedFiles([]);
-//       }
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
-
-//   const handleUrlUpload = () => {
-//     if (!urlInput) return;
-
-//     const newMedia = {
-//       id: mediaLibrary.length + 1,
-//       name: "Image from URL",
-//       url: urlInput,
-//       altText: "Image from URL",
-//       date: new Date().toISOString().split("T")[0],
-//       size: "N/A",
-//     };
-
-//     setMediaLibrary([newMedia, ...mediaLibrary]);
-//     setUrlInput("");
-//   };
-
-//   const filteredMedia = mediaLibrary.filter(
-//     (item: any) =>
-//       item.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       item.alt.toLowerCase().includes(searchQuery.toLowerCase()),
-//   );
-
-//   useEffect(() => {
-//     async function getMedia() {
-//       const response = await fetch("/api/admin/media");
-//       const data = await response.json();
-//       if (data.success) {
-//         setMediaLibrary(data.data);
-//       }
-//     }
-//     getMedia();
-//   }, []);
-
-//   console.log("mediaLibrary", mediaLibrary);
-
-//   return (
-//     <div className="min-h-screen bg-neutral-50 p-6 font-['Instrument_Sans']">
-//       <style>{`
-//         @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
-//       `}</style>
-
-//       <motion.div
-//         initial={{ opacity: 0, y: 20 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="max-w-5xl mx-auto"
-//       >
-//         {/* Header */}
-//         <motion.div
-//           initial={{ opacity: 0 }}
-//           animate={{ opacity: 1 }}
-//           transition={{ delay: 0.1 }}
-//           className="mb-8"
-//         >
-//           <h1 className="text-2xl font-semibold text-neutral-900 mb-1">
-//             Media Library
-//           </h1>
-//           <p className="text-sm text-neutral-500">
-//             Upload and manage your images
-//           </p>
-//         </motion.div>
-
-//         {/* Tabs */}
-//         <motion.div
-//           initial={{ opacity: 0 }}
-//           animate={{ opacity: 1 }}
-//           transition={{ delay: 0.2 }}
-//           className="flex gap-1 mb-6 bg-white p-1 rounded-xl shadow-sm w-fit"
-//         >
-//           {["upload", "library"].map((tab) => (
-//             <button
-//               key={tab}
-//               onClick={() => setActiveTab(tab)}
-//               className="relative px-5 py-2 text-sm font-medium rounded-lg transition-colors"
-//             >
-//               {activeTab === tab && (
-//                 <motion.div
-//                   layoutId="activeTab"
-//                   className="absolute inset-0 bg-neutral-900 rounded-lg"
-//                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-//                 />
-//               )}
-//               <span
-//                 className={`relative z-10 ${activeTab === tab ? "text-white" : "text-neutral-600"}`}
-//               >
-//                 {tab === "upload" ? "Upload" : "Library"}
-//               </span>
-//             </button>
-//           ))}
-//         </motion.div>
-
-//         {/* Content */}
-//         <AnimatePresence mode="wait">
-//           {activeTab === "upload" ? (
-//             <motion.div
-//               key="upload"
-//               initial={{ opacity: 0, x: -20 }}
-//               animate={{ opacity: 1, x: 0 }}
-//               exit={{ opacity: 0, x: 20 }}
-//               transition={{ duration: 0.3 }}
-//               className="space-y-6"
-//             >
-//               {/* Upload Method Toggle */}
-//               <div className="flex gap-2 p-1 bg-neutral-100 rounded-lg w-fit">
-//                 {[
-//                   { value: "file", icon: Upload, label: "Files" },
-//                   { value: "url", icon: Link2, label: "URL" },
-//                 ].map(({ value, icon: Icon, label }) => (
-//                   <button
-//                     key={value}
-//                     onClick={() => setUploadMethod(value)}
-//                     className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-//                       uploadMethod === value
-//                         ? "bg-white text-neutral-900 shadow-sm"
-//                         : "text-neutral-600 hover:text-neutral-900"
-//                     }`}
-//                   >
-//                     <Icon size={16} />
-//                     {label}
-//                   </button>
-//                 ))}
-//               </div>
-
-//               {uploadMethod === "file" ? (
-//                 <div className="space-y-4">
-//                   {/* Drop Zone */}
-//                   <motion.div
-//                     whileHover={{ scale: 1.01 }}
-//                     whileTap={{ scale: 0.99 }}
-//                     onDrop={handleDrop}
-//                     onDragOver={(e) => e.preventDefault()}
-//                     onClick={() =>
-//                       document.getElementById("fileInput")?.click()
-//                     }
-//                     className="relative bg-white border-2 border-dashed border-neutral-200 rounded-2xl p-12 text-center cursor-pointer transition-all hover:border-neutral-400 hover:bg-neutral-50 group"
-//                   >
-//                     <input
-//                       id="fileInput"
-//                       type="file"
-//                       multiple
-//                       accept="image/*"
-//                       onChange={handleFileSelect}
-//                       className="hidden"
-//                     />
-//                     <motion.div
-//                       initial={{ scale: 1 }}
-//                       whileHover={{ scale: 1.1 }}
-//                       className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-2xl flex items-center justify-center group-hover:bg-neutral-200 transition-colors"
-//                     >
-//                       <Upload
-//                         className="text-neutral-400 group-hover:text-neutral-600 transition-colors"
-//                         size={28}
-//                       />
-//                     </motion.div>
-//                     <p className="text-base font-medium text-neutral-900 mb-1">
-//                       Drop files here
-//                     </p>
-//                     <p className="text-sm text-neutral-500">
-//                       or click to browse • Max 100 MB
-//                     </p>
-//                   </motion.div>
-
-//                   {/* Selected Files */}
-//                   <AnimatePresence>
-//                     {selectedFiles.length > 0 && (
-//                       <motion.div
-//                         initial={{ opacity: 0, height: 0 }}
-//                         animate={{ opacity: 1, height: "auto" }}
-//                         exit={{ opacity: 0, height: 0 }}
-//                         className="space-y-3"
-//                       >
-//                         {selectedFiles.map((file, index) => (
-//                           <motion.div
-//                             key={index}
-//                             initial={{ opacity: 0, y: 10 }}
-//                             animate={{ opacity: 1, y: 0 }}
-//                             exit={{ opacity: 0, x: -100 }}
-//                             transition={{ delay: index * 0.05 }}
-//                             className="bg-white rounded-xl p-4 shadow-sm border border-neutral-100"
-//                           >
-//                             <div className="flex gap-4">
-//                               <motion.img
-//                                 whileHover={{ scale: 1.05 }}
-//                                 src={file.preview}
-//                                 alt={file.filename}
-//                                 className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-//                               />
-//                               <div className="flex-1 min-w-0 space-y-3">
-//                                 <div className="flex items-start justify-between">
-//                                   <div className="min-w-0">
-//                                     <p className="text-sm font-medium text-neutral-900 truncate">
-//                                       {file.filename}
-//                                     </p>
-//                                     <p className="text-xs text-neutral-500">
-//                                       {file.size}
-//                                     </p>
-//                                   </div>
-//                                   <motion.button
-//                                     whileHover={{ scale: 1.1 }}
-//                                     whileTap={{ scale: 0.9 }}
-//                                     onClick={() => removeFile(index)}
-//                                     className="p-1 hover:bg-red-50 rounded-lg transition-colors"
-//                                   >
-//                                     <X
-//                                       size={16}
-//                                       className="text-neutral-400 hover:text-red-500"
-//                                     />
-//                                   </motion.button>
-//                                 </div>
-//                                 <input
-//                                   type="text"
-//                                   value={file.alt}
-//                                   onChange={(e) =>
-//                                     updateFileMetadata(
-//                                       index,
-//                                       "alt",
-//                                       e.target.value,
-//                                     )
-//                                   }
-//                                   placeholder="Alt text (describe the image)"
-//                                   className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
-//                                 />
-//                                 <input
-//                                   type="text"
-//                                   value={file.foldername}
-//                                   onChange={(e) =>
-//                                     updateFileMetadata(
-//                                       index,
-//                                       "foldername",
-//                                       e.target.value,
-//                                     )
-//                                   }
-//                                   placeholder="Folder name"
-//                                   className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
-//                                 />
-//                               </div>
-//                             </div>
-//                           </motion.div>
-//                         ))}
-
-//                         <motion.button
-//                           whileHover={{ scale: 1.02 }}
-//                           whileTap={{ scale: 0.98 }}
-//                           onClick={handleUpload}
-//                           className="w-full py-3 bg-neutral-900 text-white rounded-xl font-medium text-sm shadow-sm hover:bg-neutral-800 transition-colors"
-//                         >
-//                           Upload {selectedFiles.length}{" "}
-//                           {selectedFiles.length === 1 ? "file" : "files"}
-//                         </motion.button>
-//                       </motion.div>
-//                     )}
-//                   </AnimatePresence>
-//                 </div>
-//               ) : (
-//                 <motion.div
-//                   initial={{ opacity: 0, y: 10 }}
-//                   animate={{ opacity: 1, y: 0 }}
-//                   className="bg-white rounded-2xl p-6 shadow-sm"
-//                 >
-//                   <label className="block text-sm font-medium text-neutral-900 mb-2">
-//                     Image URL
-//                   </label>
-//                   <div className="flex gap-2">
-//                     <input
-//                       type="text"
-//                       value={urlInput}
-//                       onChange={(e) => setUrlInput(e.target.value)}
-//                       placeholder="https://example.com/image.jpg"
-//                       className="flex-1 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
-//                     />
-//                     <motion.button
-//                       whileHover={{ scale: 1.05 }}
-//                       whileTap={{ scale: 0.95 }}
-//                       onClick={handleUrlUpload}
-//                       className="px-6 py-3 bg-neutral-900 text-white rounded-xl font-medium text-sm hover:bg-neutral-800 transition-colors flex items-center gap-2"
-//                     >
-//                       <Link2 size={16} />
-//                       Insert
-//                     </motion.button>
-//                   </div>
-//                 </motion.div>
-//               )}
-//             </motion.div>
-//           ) : (
-//             <motion.div
-//               key="library"
-//               initial={{ opacity: 0, x: 20 }}
-//               animate={{ opacity: 1, x: 0 }}
-//               exit={{ opacity: 0, x: -20 }}
-//               transition={{ duration: 0.3 }}
-//               className="space-y-4"
-//             >
-//               {/* Search */}
-//               <div className="relative">
-//                 <Search
-//                   className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-//                   size={18}
-//                 />
-//                 <input
-//                   type="text"
-//                   placeholder="Search media"
-//                   value={searchQuery}
-//                   onChange={(e) => setSearchQuery(e.target.value)}
-//                   className="w-full pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all shadow-sm"
-//                 />
-//               </div>
-
-//               {/* Media Grid */}
-//               <motion.div
-//                 layout
-//                 className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-//               >
-//                 <AnimatePresence>
-//                   {filteredMedia.map((item: any, index: number) => (
-//                     <motion.div
-//                       key={item.id}
-//                       layout
-//                       initial={{ opacity: 0, scale: 0.8 }}
-//                       animate={{ opacity: 1, scale: 1 }}
-//                       exit={{ opacity: 0, scale: 0.8 }}
-//                       transition={{ delay: index * 0.03 }}
-//                       whileHover={{ y: -4 }}
-//                       onClick={() => setSelectedMedia(item)}
-//                       className="group relative bg-white rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all"
-//                     >
-//                       <div className="aspect-square overflow-hidden bg-neutral-100">
-//                         <motion.img
-//                           whileHover={{ scale: 1.1 }}
-//                           transition={{ duration: 0.3 }}
-//                           src={item.url}
-//                           alt={item.altText}
-//                           className="w-full h-full object-cover"
-//                         />
-//                       </div>
-//                       <div className="p-3">
-//                         <p className="text-xs font-medium text-neutral-900 truncate mb-1">
-//                           {item.name}
-//                         </p>
-//                         <div className="flex items-center gap-2 text-xs text-neutral-500">
-//                           <Clock size={12} />
-//                           <span>{item.size}</span>
-//                         </div>
-//                       </div>
-//                       <motion.div
-//                         initial={{ opacity: 0 }}
-//                         whileHover={{ opacity: 1 }}
-//                         className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity"
-//                       >
-//                         <p className="text-xs text-white font-medium">
-//                           Click to select
-//                         </p>
-//                       </motion.div>
-//                     </motion.div>
-//                   ))}
-//                 </AnimatePresence>
-//               </motion.div>
-
-//               {filteredMedia.length === 0 && (
-//                 <motion.div
-//                   initial={{ opacity: 0 }}
-//                   animate={{ opacity: 1 }}
-//                   className="text-center py-16"
-//                 >
-//                   <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-2xl flex items-center justify-center">
-//                     <ImageIcon className="text-neutral-400" size={28} />
-//                   </div>
-//                   <p className="text-sm text-neutral-500">No media found</p>
-//                 </motion.div>
-//               )}
-//             </motion.div>
-//           )}
-//         </AnimatePresence>
-
-//         {/* Selected Media Preview */}
-//         {/* <AnimatePresence>
-//           {selectedMedia && (
-//             <motion.div
-//               initial={{ opacity: 0 }}
-//               animate={{ opacity: 1 }}
-//               exit={{ opacity: 0 }}
-//               onClick={() => setSelectedMedia(null)}
-//               className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50"
-//             >
-//               <motion.div
-//                 initial={{ scale: 0.9, y: 20 }}
-//                 animate={{ scale: 1, y: 0 }}
-//                 exit={{ scale: 0.9, y: 20 }}
-//                 onClick={(e) => e.stopPropagation()}
-//                 className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl"
-//               >
-//                 <div className="flex items-center justify-between mb-4">
-//                   <h3 className="text-lg font-semibold text-neutral-900">
-//                     Media Details
-//                   </h3>
-//                   <motion.button
-//                     whileHover={{ scale: 1.1 }}
-//                     whileTap={{ scale: 0.9 }}
-//                     onClick={() => setSelectedMedia(null)}
-//                     className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-//                   >
-//                     <X size={20} />
-//                   </motion.button>
-//                 </div>
-//                 <img
-//                   src={selectedMedia.url}
-//                   alt={selectedMedia.altText}
-//                   className="w-full rounded-xl mb-4"
-//                 />
-//                 <div className="space-y-2 text-sm">
-//                   <div>
-//                     <span className="text-neutral-500">Name:</span>
-//                     <span className="ml-2 text-neutral-900 font-medium">
-//                       {selectedMedia.name}
-//                     </span>
-//                   </div>
-//                   <div>
-//                     <span className="text-neutral-500">Alt Text:</span>
-//                     <span className="ml-2 text-neutral-900 font-medium">
-//                       {selectedMedia.altText}
-//                     </span>
-//                   </div>
-//                   <div>
-//                     <span className="text-neutral-500">Size:</span>
-//                     <span className="ml-2 text-neutral-900 font-medium">
-//                       {selectedMedia.size}
-//                     </span>
-//                   </div>
-//                 </div>
-//                 <motion.button
-//                   whileHover={{ scale: 1.02 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   className="w-full mt-6 py-3 bg-neutral-900 text-white rounded-xl font-medium text-sm hover:bg-neutral-800 transition-colors"
-//                 >
-//                   Insert Image
-//                 </motion.button>
-//               </motion.div>
-//             </motion.div>
-//           )}
-//         </AnimatePresence> */}
-//       </motion.div>
-//     </div>
-//   );
-// };
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -550,9 +11,21 @@ import {
   Clock,
   Trash2,
   Plus,
+  Terminal,
+  Database,
+  Layers,
+  FileText,
+  Type,
+  File as FileIcon,
 } from "lucide-react";
 
-export const MediaUploader = ({ onSelect, hideHeader = false }: { onSelect?: (item: any) => void; hideHeader?: boolean }) => {
+export const MediaUploader = ({
+  onSelect,
+  hideHeader = false,
+}: {
+  onSelect?: (item: any) => void;
+  hideHeader?: boolean;
+}) => {
   const [activeTab, setActiveTab] = useState<string>("upload");
   const [uploadMethod, setUploadMethod] = useState<string>("file");
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
@@ -562,32 +35,49 @@ export const MediaUploader = ({ onSelect, hideHeader = false }: { onSelect?: (it
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 
-  const handleFileSelect = (e: any) => {
+  const getFileType = (filename: string) => {
+    const ext = filename.split(".").pop()?.toLowerCase() || "";
+    if (["jpg", "jpeg", "png", "gif", "webp", "avif"].includes(ext)) return "image";
+    if (ext === "svg") return "svg";
+    if (ext === "pdf") return "pdf";
+    if (["woff", "woff2", "ttf", "otf"].includes(ext)) return "font";
+    return "other";
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    const fileObjects = files.map((file: any) => ({
-      file,
-      filename: file.name,
-      alt: "",
-      preview: URL.createObjectURL(file),
-      size: (file.size / 1024).toFixed(0) + " KB",
-      foldername: "",
-      type: "image",
-    }));
+    const fileObjects = files.map((file: File) => {
+      const type = getFileType(file.name);
+      return {
+        file,
+        filename: file.name,
+        alt: "",
+        preview: (type === "image" || type === "svg") ? URL.createObjectURL(file) : null,
+        size: (file.size / 1024).toFixed(0) + " KB",
+        foldername: "",
+        type,
+      };
+    });
     setSelectedFiles([...selectedFiles, ...fileObjects]);
   };
 
-  const handleDrop = (e: any) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    if (!e.dataTransfer.files) return;
     const files = Array.from(e.dataTransfer.files);
-    const fileObjects = files.map((file: any) => ({
-      file,
-      filename: file.name,
-      alt: "",
-      preview: URL.createObjectURL(file),
-      size: (file.size / 1024).toFixed(0) + " KB",
-      foldername: "",
-      type: "image",
-    }));
+    const fileObjects = files.map((file: File) => {
+      const type = getFileType(file.name);
+      return {
+        file,
+        filename: file.name,
+        alt: "",
+        preview: (type === "image" || type === "svg") ? URL.createObjectURL(file) : null,
+        size: (file.size / 1024).toFixed(0) + " KB",
+        foldername: "",
+        type,
+      };
+    });
     setSelectedFiles([...selectedFiles, ...fileObjects]);
   };
 
@@ -627,7 +117,6 @@ export const MediaUploader = ({ onSelect, hideHeader = false }: { onSelect?: (it
       });
       const data = await response.json();
       if (data.success) {
-        console.log(data.data);
         setMediaLibrary([...data.data, ...mediaLibrary]);
         setSelectedFiles([]);
       }
@@ -652,7 +141,6 @@ export const MediaUploader = ({ onSelect, hideHeader = false }: { onSelect?: (it
     setUrlInput("");
   };
 
-  // Get unique folder names from media library
   const folders = Array.from(
     new Set(
       mediaLibrary
@@ -661,7 +149,6 @@ export const MediaUploader = ({ onSelect, hideHeader = false }: { onSelect?: (it
     ),
   ).sort();
 
-  // Filter media by search query and selected folder
   const filteredMedia = mediaLibrary.filter((item: any) => {
     const matchesSearch =
       item.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -685,483 +172,450 @@ export const MediaUploader = ({ onSelect, hideHeader = false }: { onSelect?: (it
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6 font-['Instrument_Sans']">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
-      `}</style>
+    // <div className="min-h-screen bg-ink p-4 md:p-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full h-full mx-auto"
+    >
+      {/* Header Section */}
+      {!hideHeader && (
+        <div className="mb-12 border-b border-slate-100 pb-10">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 text-primary/60">
+                <Database size={16} strokeWidth={2.5} />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">
+                  Centralized Asset Bridge
+                </span>
+              </div>
+              <h1 className="text-6xl font-heading font-black text-slate-900 uppercase tracking-tight leading-none italic">
+                Media <span className="text-primary">Library</span>
+              </h1>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] italic flex items-center gap-3">
+                Centralized digital asset management and global distribution framework.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-5xl mx-auto"
-      >
-        {/* Header */}
-        {!hideHeader && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="mb-8"
-          >
-            <h1 className="text-2xl font-semibold text-neutral-900 mb-1">
-              Media Library
-            </h1>
-            <p className="text-sm text-neutral-500">
-              Upload and manage your images
-            </p>
-          </motion.div>
-        )}
-
-        {/* Tabs */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex gap-1 mb-6 bg-white p-1 rounded-xl shadow-sm w-fit"
-        >
+      {/* Navigation Tabs */}
+      <div className="flex flex-col md:flex-row gap-8 mb-10">
+        <div className="flex gap-2 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm self-start">
           {["upload", "library"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="relative px-5 py-2 text-sm font-medium rounded-lg transition-colors"
+              className={`relative px-8 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl italic ${
+                activeTab === tab
+                  ? "bg-primary text-white shadow-lg shadow-primary/20"
+                  : "text-slate-400 hover:text-primary hover:bg-slate-50"
+              }`}
             >
-              {activeTab === tab && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute inset-0 bg-neutral-900 rounded-lg"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span
-                className={`relative z-10 ${activeTab === tab ? "text-white" : "text-neutral-600"}`}
-              >
-                {tab === "upload" ? "Upload" : "Library"}
-              </span>
+              {tab === "upload" ? "Upload Assets" : "Asset Gallery"}
             </button>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Content */}
-        <AnimatePresence mode="wait">
-          {activeTab === "upload" ? (
-            <motion.div
-              key="upload"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Upload Method Toggle */}
-              <div className="flex gap-2 p-1 bg-neutral-100 rounded-lg w-fit">
-                {[
-                  { value: "file", icon: Upload, label: "Files" },
-                  { value: "url", icon: Link2, label: "URL" },
-                ].map(({ value, icon: Icon, label }) => (
+        {activeTab === "library" && (
+          <div className="flex-1 relative group">
+            <Search
+              className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-all"
+              size={20}
+              strokeWidth={2.5}
+            />
+            <input
+              type="text"
+              placeholder="Search assets by name or metadata..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-16 pr-6 py-4 bg-white border border-slate-100 rounded-2xl text-[13px] font-black text-slate-900 placeholder:text-slate-200 focus:outline-none focus:border-primary/50 transition-all shadow-sm uppercase tracking-widest"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <AnimatePresence mode="wait">
+        {activeTab === "upload" ? (
+          <motion.div
+            key="upload"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="space-y-6"
+          >
+            <div className="flex gap-3 p-2 bg-white border border-slate-100 w-fit rounded-2xl shadow-sm">
+              {[
+                { value: "file", icon: Upload, label: "Local Files" },
+                { value: "url", icon: Link2, label: "Remote URL" },
+              ].map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setUploadMethod(value)}
+                  className={`flex items-center gap-3 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all italic ${
+                    uploadMethod === value
+                      ? "bg-primary/10 text-primary border border-primary/20 shadow-sm shadow-primary/5"
+                      : "text-slate-400 hover:text-primary hover:bg-slate-50"
+                  }`}
+                >
+                  <Icon size={16} strokeWidth={2.5} />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {uploadMethod === "file" ? (
+              <div className="space-y-6">
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => document.getElementById("fileInput")?.click()}
+                  className="relative bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] p-24 text-center cursor-pointer transition-all hover:border-primary/50 group shadow-inner overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-primary/[0.01] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <input
+                    id="fileInput"
+                    type="file"
+                    multiple
+                    accept="image/*,.svg,.pdf,.woff,.woff2,.ttf,.otf"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <div className="w-24 h-24 mx-auto mb-8 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all shadow-sm">
+                    <Upload
+                      className="text-slate-300 group-hover:text-primary transition-all"
+                      size={40}
+                      strokeWidth={2.5}
+                    />
+                  </div>
+                  <p className="text-xl font-black text-slate-900 uppercase tracking-[0.2em] mb-3 italic">
+                    Upload Digital Assets
+                  </p>
+                  <p className="text-[11px] text-slate-400 uppercase tracking-[0.3em] font-bold italic">
+                    Drag and drop files here or browse local storage • Max 100MB
+                  </p>
+                </motion.div>
+
+                {selectedFiles.length > 0 && (
+                  <motion.div className="space-y-4">
+                    {selectedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="bg-white border border-slate-100 p-6 flex gap-8 rounded-[2rem] shadow-sm italic"
+                      >
+                        <div className="w-28 h-28 bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden rounded-2xl shadow-inner">
+                          {file.preview ? (
+                            <img
+                              src={file.preview}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-primary/40">
+                                {file.type === "font" && <Type size={36} strokeWidth={2.5} />}
+                                {file.type === "pdf" && <FileText size={36} strokeWidth={2.5} />}
+                                {file.type === "other" && <FileIcon size={36} strokeWidth={2.5} />}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 space-y-6">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest truncate max-w-sm">
+                                {file.filename}
+                              </p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
+                                {file.size}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => removeFile(index)}
+                              className="h-10 w-10 bg-slate-50 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex items-center justify-center rounded-xl"
+                            >
+                              <X size={20} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <input
+                              type="text"
+                              value={file.alt}
+                              onChange={(e) =>
+                                updateFileMetadata(index, "alt", e.target.value)
+                              }
+                              placeholder="ALT TEXT (SEO)..."
+                              className="bg-slate-50 border border-slate-100 p-4 text-[11px] font-bold text-slate-900 focus:border-primary/50 outline-none uppercase tracking-widest rounded-xl shadow-inner italic"
+                            />
+                            <input
+                              type="text"
+                              value={file.foldername}
+                              onChange={(e) =>
+                                updateFileMetadata(
+                                  index,
+                                  "foldername",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="FOLDER NAME..."
+                              className="bg-slate-50 border border-slate-100 p-4 text-[11px] font-bold text-slate-900 focus:border-primary/50 outline-none uppercase tracking-widest rounded-xl shadow-inner italic"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      onClick={handleUpload}
+                      className="w-full py-6 bg-primary text-white font-black uppercase tracking-[0.4em] text-[11px] hover:bg-slate-900 transition-all shadow-xl shadow-primary/20 rounded-2xl italic active:scale-[0.98]"
+                    >
+                      Upload & Synchronize Assets ({selectedFiles.length} Items)
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-sm">
+                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 italic">
+                  Remote Asset Source (URL)
+                </label>
+                <div className="flex flex-col md:flex-row gap-6">
+                  <input
+                    type="text"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    placeholder="https://cloud.assets.com/resource.jpg"
+                    className="flex-1 bg-slate-50 border border-slate-100 p-5 text-[13px] font-bold text-slate-900 focus:border-primary/50 outline-none uppercase tracking-widest rounded-2xl shadow-inner"
+                  />
                   <button
-                    key={value}
-                    onClick={() => setUploadMethod(value)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                      uploadMethod === value
-                        ? "bg-white text-neutral-900 shadow-sm"
-                        : "text-neutral-600 hover:text-neutral-900"
+                    onClick={handleUrlUpload}
+                    className="px-10 py-5 bg-primary text-white font-black uppercase tracking-[0.3em] text-[11px] hover:bg-primary/90 transition-all flex items-center justify-center gap-3 rounded-2xl shadow-xl shadow-primary/20 italic active:scale-95"
+                  >
+                    <Plus size={20} strokeWidth={3} /> Import Asset
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="library"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-6"
+          >
+            {folders.length > 0 && (
+              <div className="flex flex-wrap gap-3 pb-6 border-b border-slate-50">
+                <button
+                  onClick={() => setSelectedFolder(null)}
+                  className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl italic ${
+                    selectedFolder === null
+                      ? "bg-primary text-white shadow-lg shadow-primary/20"
+                      : "bg-white text-slate-400 border border-slate-100 hover:text-primary hover:bg-slate-50"
+                  }`}
+                >
+                  All Folders
+                </button>
+                {folders.map((folder: any) => (
+                  <button
+                    key={folder}
+                    onClick={() => setSelectedFolder(folder)}
+                    className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all rounded-xl italic ${
+                      selectedFolder === folder
+                        ? "bg-primary text-white shadow-lg shadow-primary/20"
+                        : "bg-white text-slate-400 border border-slate-100 hover:text-primary hover:bg-slate-50"
                     }`}
                   >
-                    <Icon size={16} />
-                    {label}
+                    {folder}
                   </button>
                 ))}
               </div>
+            )}
 
-              {uploadMethod === "file" ? (
-                <div className="space-y-4">
-                  {/* Drop Zone */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <AnimatePresence>
+                {filteredMedia.map((item: any, index: number) => (
                   <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    onClick={() =>
-                      document.getElementById("fileInput")?.click()
-                    }
-                    className="relative bg-white border-2 border-dashed border-neutral-200 rounded-2xl p-12 text-center cursor-pointer transition-all hover:border-neutral-400 hover:bg-neutral-50 group"
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ y: -5 }}
+                    onClick={() => setSelectedMedia(item)}
+                    className="group relative bg-white border border-slate-100 rounded-3xl overflow-hidden cursor-pointer hover:border-primary/50 transition-all shadow-sm"
                   >
-                    <input
-                      id="fileInput"
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <motion.div
-                      initial={{ scale: 1 }}
-                      whileHover={{ scale: 1.1 }}
-                      className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-2xl flex items-center justify-center group-hover:bg-neutral-200 transition-colors"
-                    >
-                      <Upload
-                        className="text-neutral-400 group-hover:text-neutral-600 transition-colors"
-                        size={28}
-                      />
-                    </motion.div>
-                    <p className="text-base font-medium text-neutral-900 mb-1">
-                      Drop files here
-                    </p>
-                    <p className="text-sm text-neutral-500">
-                      or click to browse • Max 100 MB
-                    </p>
-                  </motion.div>
-
-                  {/* Selected Files */}
-                  <AnimatePresence>
-                    {selectedFiles.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="space-y-3"
-                      >
-                        {selectedFiles.map((file, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -100 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="bg-white rounded-xl p-4 shadow-sm border border-neutral-100"
-                          >
-                            <div className="flex gap-4">
-                              <motion.img
-                                whileHover={{ scale: 1.05 }}
-                                src={file.preview}
-                                alt={file.filename}
-                                className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                              />
-                              <div className="flex-1 min-w-0 space-y-3">
-                                <div className="flex items-start justify-between">
-                                  <div className="min-w-0">
-                                    <p className="text-sm font-medium text-neutral-900 truncate">
-                                      {file.filename}
-                                    </p>
-                                    <p className="text-xs text-neutral-500">
-                                      {file.size}
-                                    </p>
-                                  </div>
-                                  <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => removeFile(index)}
-                                    className="p-1 hover:bg-red-50 rounded-lg transition-colors"
-                                  >
-                                    <X
-                                      size={16}
-                                      className="text-neutral-400 hover:text-red-500"
-                                    />
-                                  </motion.button>
-                                </div>
-                                <input
-                                  type="text"
-                                  value={file.alt}
-                                  onChange={(e) =>
-                                    updateFileMetadata(
-                                      index,
-                                      "alt",
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Alt text (describe the image)"
-                                  className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
-                                />
-                                <input
-                                  type="text"
-                                  value={file.foldername}
-                                  onChange={(e) =>
-                                    updateFileMetadata(
-                                      index,
-                                      "foldername",
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="Folder name"
-                                  className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
-                                />
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleUpload}
-                          className="w-full py-3 bg-neutral-900 text-white rounded-xl font-medium text-sm shadow-sm hover:bg-neutral-800 transition-colors"
-                        >
-                          Upload {selectedFiles.length}{" "}
-                          {selectedFiles.length === 1 ? "file" : "files"}
-                        </motion.button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl p-6 shadow-sm"
-                >
-                  <label className="block text-sm font-medium text-neutral-900 mb-2">
-                    Image URL
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      className="flex-1 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleUrlUpload}
-                      className="px-6 py-3 bg-neutral-900 text-white rounded-xl font-medium text-sm hover:bg-neutral-800 transition-colors flex items-center gap-2"
-                    >
-                      <Link2 size={16} />
-                      Insert
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="library"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              {/* Search */}
-              <div className="relative">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  placeholder="Search media"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all shadow-sm"
-                />
-              </div>
-
-              {/* Folder Tags */}
-              {folders.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-wrap gap-2"
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedFolder(null)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      selectedFolder === null
-                        ? "bg-neutral-900 text-white shadow-sm"
-                        : "bg-white text-neutral-600 border border-neutral-200 hover:border-neutral-300"
-                    }`}
-                  >
-                    All
-                  </motion.button>
-                  {folders.map((folder: any) => (
-                    <motion.button
-                      key={folder}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedFolder(folder)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        selectedFolder === folder
-                          ? "bg-neutral-900 text-white shadow-sm"
-                          : "bg-white text-neutral-600 border border-neutral-200 hover:border-neutral-300"
-                      }`}
-                    >
-                      {folder}
-                    </motion.button>
-                  ))}
-                </motion.div>
-              )}
-
-              {/* Media Grid */}
-              <motion.div
-                layout
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
-              >
-                <AnimatePresence>
-                  {filteredMedia.map((item: any, index: number) => (
-                    <motion.div
-                      key={item.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ delay: index * 0.03 }}
-                      whileHover={{ y: -4 }}
-                      onClick={() => setSelectedMedia(item)}
-                      className="group relative bg-white rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all"
-                    >
-                      <div className="aspect-square overflow-hidden bg-neutral-100">
-                        <motion.img
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.3 }}
+                    <div className="aspect-square bg-slate-50 overflow-hidden border-b border-slate-100 flex items-center justify-center">
+                      {item.type === "font" || item.type === "pdf" || item.type === "other" ? (
+                        <div className="flex flex-col items-center gap-3 text-slate-300 group-hover:text-primary transition-colors">
+                           {item.type === "font" && <Type size={40} strokeWidth={2.5} />}
+                           {item.type === "pdf" && <FileText size={40} strokeWidth={2.5} />}
+                           {item.type === "other" && <FileIcon size={40} strokeWidth={2.5} />}
+                           <span className="text-[9px] font-black uppercase tracking-widest opacity-60 italic">
+                             {item.filename.split('.').pop()} Asset
+                           </span>
+                        </div>
+                      ) : (
+                        <img
                           src={item.url}
                           alt={item.alt}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all group-hover:scale-110 duration-700"
                         />
+                      )}
+                    </div>
+                    <div className="p-5 bg-white">
+                      <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest truncate italic">
+                        {item.filename}
+                      </p>
+                      <div className="flex items-center gap-3 mt-2 opacity-50">
+                        <Clock size={12} className="text-primary" strokeWidth={2.5} />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          {(item.size / 1024).toFixed(0)} KB
+                        </span>
                       </div>
-                      <div className="p-3">
-                        <p className="text-xs font-medium text-neutral-900 truncate mb-1">
-                          {item.filename}
-                        </p>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-xs text-neutral-500">
-                            <Clock size={12} />
-                            <span>{(item.size / 1024).toFixed(0)} KB</span>
-                          </div>
-                          {item.foldername && (
-                            <span className="text-xs text-neutral-400 truncate max-w-[80px]">
-                              {item.foldername}
-                            </span>
-                          )}
-                        </div>
+                    </div>
+
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
+                      <div className="flex gap-3">
+                        <button className="p-3 bg-primary hover:bg-slate-900 text-white transition-all shadow-xl rounded-2xl active:scale-90">
+                          <Plus size={18} strokeWidth={3} />
+                        </button>
+                        <button className="p-3 bg-red-500 hover:bg-slate-900 text-white transition-all shadow-xl rounded-2xl active:scale-90">
+                          <Trash2 size={18} strokeWidth={2.5} />
+                        </button>
                       </div>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
-                        className="absolute  inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <div className="flex justify-between w-full gap-2">
-                          <button className="flex items-center justify-center p-2 rounded-md bg-green-500 hover:bg-green-600 transition-colors duration-200 shadow-sm">
-                            <Plus size={14} className="text-white" />
-                          </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
 
-                          <button className="flex items-center justify-center p-2 rounded-md bg-red-500 hover:bg-red-600 transition-colors duration-200 shadow-sm">
-                            <Trash2 size={14} className="text-white" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
+            {filteredMedia.length === 0 && (
+              <div className="text-center py-32 bg-slate-50 border border-slate-100 rounded-[3rem] shadow-inner italic">
+                <Terminal className="mx-auto mb-6 text-slate-200" size={64} strokeWidth={2.5} />
+                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">
+                  No assets found in this folder.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              {filteredMedia.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-16"
-                >
-                  <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-2xl flex items-center justify-center">
-                    <ImageIcon className="text-neutral-400" size={28} />
-                  </div>
-                  <p className="text-sm text-neutral-500">
-                    {searchQuery || selectedFolder
-                      ? "No media found matching your filters"
-                      : "No media found"}
-                  </p>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {selectedMedia && (
+      {/* Asset Detail Modal */}
+      <AnimatePresence>
+        {selectedMedia && (
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl flex items-center justify-center p-8 z-[100]"
+            onClick={() => setSelectedMedia(null)}
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedMedia(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50"
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="bg-white border border-slate-100 p-2 max-w-4xl w-full shadow-[0_0_100px_rgba(0,0,0,0.1)] rounded-[3rem] overflow-hidden"
             >
-              <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-neutral-900">
-                    Media Details
-                  </h3>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+              <div className="bg-white p-10">
+                <div className="flex items-center justify-between mb-10 border-b border-slate-50 pb-8">
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 text-primary">
+                      <Layers size={24} strokeWidth={2.5} />
+                    </div>
+                    <h3 className="text-2xl font-heading font-black text-slate-900 uppercase tracking-tight italic">
+                      Asset <span className="text-primary">Details</span>
+                    </h3>
+                  </div>
+                  <button
                     onClick={() => setSelectedMedia(null)}
-                    className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                    className="h-12 w-12 rounded-2xl bg-slate-50 text-slate-300 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center shadow-inner"
                   >
-                    <X size={20} />
-                  </motion.button>
+                    <X size={24} strokeWidth={2.5} />
+                  </button>
                 </div>
-                <img
-                  src={selectedMedia.url}
-                  alt={selectedMedia.alt || selectedMedia.altText || ""}
-                  className="w-full h-auto max-h-[400px] object-contain rounded-xl mb-4 bg-neutral-100"
-                />
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between border-b border-neutral-100 pb-2">
-                    <span className="text-neutral-500">Name:</span>
-                    <span className="text-neutral-900 font-medium">
-                      {selectedMedia.filename}
-                    </span>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="bg-slate-50 p-4 rounded-[2.5rem] border border-slate-100 min-h-[350px] flex items-center justify-center relative overflow-hidden shadow-inner">
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+                      <ImageIcon size={200} className="text-primary" />
+                    </div>
+                    {selectedMedia.type === "font" || selectedMedia.type === "pdf" || selectedMedia.type === "other" ? (
+                         <div className="flex flex-col items-center gap-6 text-primary relative z-10">
+                            {selectedMedia.type === "font" && <Type size={80} strokeWidth={2.5} />}
+                            {selectedMedia.type === "pdf" && <FileText size={80} strokeWidth={2.5} />}
+                            {selectedMedia.type === "other" && <FileIcon size={80} strokeWidth={2.5} />}
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] bg-primary/10 px-6 py-3 rounded-2xl border border-primary/20 italic">
+                                {selectedMedia.filename.split('.').pop()} RESOURCE
+                            </span>
+                         </div>
+                    ) : (
+                      <img
+                        src={selectedMedia.url}
+                        alt=""
+                        className="max-h-[300px] w-auto object-contain relative z-10 drop-shadow-2xl"
+                      />
+                    )}
                   </div>
-                  <div className="flex justify-between border-b border-neutral-100 pb-2">
-                    <span className="text-neutral-500">Alt Text:</span>
-                    <span className="text-neutral-900 font-medium">
-                      {selectedMedia.alt || "No alt text"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Size:</span>
-                    <span className="text-neutral-900 font-medium">
-                      {typeof selectedMedia.size === 'number' ? `${(selectedMedia.size / 1024).toFixed(0)} KB` : selectedMedia.size}
-                    </span>
+
+                  <div className="space-y-8 flex flex-col justify-center">
+                    <div className="space-y-6">
+                      <div className="border-l-4 border-primary/20 pl-6 py-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 italic">
+                          Asset Name
+                        </p>
+                        <p className="text-lg font-black text-slate-900 uppercase tracking-widest italic truncate">
+                          {selectedMedia.filename}
+                        </p>
+                      </div>
+                      <div className="border-l-4 border-slate-100 pl-6 py-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 italic">
+                          Folder Location
+                        </p>
+                        <p className="text-sm font-black text-slate-600 uppercase tracking-widest italic">
+                          {selectedMedia.foldername || "Primary Storage"}
+                        </p>
+                      </div>
+                      <div className="border-l-4 border-slate-100 pl-6 py-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 italic">
+                          File Size
+                        </p>
+                        <p className="text-sm font-black text-slate-600 uppercase tracking-widest italic">
+                          {typeof selectedMedia.size === "number"
+                            ? `${(selectedMedia.size / 1024).toFixed(0)} KB`
+                            : selectedMedia.size}
+                        </p>
+                      </div>
+                    </div>
+
+                    {onSelect ? (
+                      <button
+                        onClick={() => {
+                          onSelect(selectedMedia);
+                          setSelectedMedia(null);
+                        }}
+                        className="w-full py-5 bg-primary text-white font-black uppercase tracking-[0.4em] text-[11px] hover:bg-slate-900 transition-all rounded-2xl shadow-xl shadow-primary/20 italic active:scale-95"
+                      >
+                        Select Asset
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedMedia.url);
+                          setSelectedMedia(null);
+                        }}
+                        className="w-full py-5 bg-slate-50 border border-slate-100 text-slate-400 font-black uppercase tracking-[0.3em] text-[11px] hover:text-primary hover:border-primary/30 transition-all rounded-2xl italic active:scale-95 shadow-sm"
+                      >
+                        Copy Asset Link
+                      </button>
+                    )}
                   </div>
                 </div>
-                {onSelect ? (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      onSelect(selectedMedia);
-                      setSelectedMedia(null);
-                    }}
-                    className="w-full mt-6 py-3 bg-green-600 text-white rounded-xl font-medium text-sm hover:bg-green-700 transition-colors shadow-lg shadow-green-100"
-                  >
-                    Select & Insert Image
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      // Copy link logic or just close
-                      navigator.clipboard.writeText(selectedMedia.url);
-                      setSelectedMedia(null);
-                    }}
-                    className="w-full mt-6 py-3 bg-neutral-900 text-white rounded-xl font-medium text-sm hover:bg-neutral-800 transition-colors"
-                  >
-                    Copy Image URL
-                  </motion.button>
-                )}
-              </motion.div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
+          </div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+    // </div>
   );
 };

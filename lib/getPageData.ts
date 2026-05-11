@@ -57,3 +57,34 @@ export const getSingleProduct = cache(async (id: string) => {
 
   return serialize(products[0]);
 });
+
+export const getTenantRegistry = cache(async () => {
+  const db = await connectTenantDB();
+  const tenantRegistry = db.collection("tenant_registry");
+
+  const tenant = await tenantRegistry.findOne({ type: "branding" });
+
+  return serialize(tenant);
+});
+
+export const getBusinessBlueprint = cache(async () => {
+  const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/platform/business-blueprint`,
+      {
+        headers: {
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
+      },
+    );
+    const data = await response.json();
+    return serialize(data.data);
+  } catch (error) {
+    console.error("Error fetching business blueprint:", error);
+    return null;
+  }
+});

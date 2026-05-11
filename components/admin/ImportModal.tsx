@@ -131,33 +131,38 @@ export function ImportModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-5xl sm:rounded-3xl border-slate-100 shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <div className="p-2 bg-slate-900 text-white rounded-xl">
-              <FileJson size={20} />
+      <DialogContent className="!max-w-4xl bg-white border border-slate-100 rounded-[2.5rem] shadow-2xl p-0 overflow-hidden">
+        <DialogHeader className="p-10 border-b border-slate-50 space-y-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+            <FileJson size={120} />
+          </div>
+          <DialogTitle className="text-3xl font-heading font-black text-slate-900 uppercase tracking-tighter flex items-center gap-5 italic">
+            <div className="h-14 w-14 bg-primary/5 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+              <FileJson size={28} strokeWidth={2.5} />
             </div>
             {title}
           </DialogTitle>
-          <DialogDescription className="text-slate-500">
+          <DialogDescription className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] italic">
             {description}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="p-10 space-y-8">
           {!file ? (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-all group"
+              className="border-2 border-dashed border-slate-100 bg-slate-50/50 rounded-[2rem] p-16 flex flex-col items-center justify-center gap-6 cursor-pointer hover:border-primary/30 hover:bg-slate-50 transition-all group shadow-inner"
             >
-              <div className="p-4 bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600 rounded-full transition-colors">
-                <Upload size={24} />
+              <div className="h-20 w-20 bg-white text-slate-300 group-hover:bg-primary/5 group-hover:text-primary transition-all border border-slate-100 group-hover:border-primary/20 rounded-2xl flex items-center justify-center shadow-sm">
+                <Upload size={36} strokeWidth={2.5} />
               </div>
-              <div className="text-center">
-                <p className="text-sm font-bold text-slate-700">
-                  Click to upload or drag and drop
+              <div className="text-center space-y-2">
+                <p className="text-xs font-black text-slate-900 uppercase tracking-widest italic">
+                  Select Import File
                 </p>
-                <p className="text-xs text-slate-400">JSON files only</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                  Drag and drop or click to browse JSON datasets
+                </p>
               </div>
               <input
                 type="file"
@@ -238,44 +243,37 @@ export function ImportModal({
             </div>
           )}
 
-          <div className="flex items-center justify-between px-1">
-            <Button
-              variant="link"
-              className="text-xs text-slate-600 font-bold p-0 h-auto gap-2 hover:text-slate-900"
+          <div className="flex items-center justify-between border-t border-slate-50 pt-8">
+            <button
+              className="text-[10px] text-primary font-black uppercase tracking-widest italic flex items-center gap-4 hover:opacity-70 transition-all"
               onClick={handleDownloadSample}
             >
-              <Download size={14} />
-              Sample JSON
-            </Button>
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
-              <AlertCircle size={12} className="text-amber-500" />
-              Existing items will be skipped
+              <Download size={16} strokeWidth={2.5} /> Download Sample Template
+            </button>
+            <div className="flex items-center gap-4 text-[9px] text-slate-300 font-bold uppercase tracking-widest italic">
+              <AlertCircle size={14} strokeWidth={2.5} className="text-amber-500" /> Existing items will be skipped
             </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-2">
-          <Button
-            variant="ghost"
+        <DialogFooter className="bg-slate-50/50 p-10 border-t border-slate-100 flex items-center justify-end gap-6 sm:gap-0">
+          <button
             onClick={handleClose}
-            className="rounded-xl text-slate-500 font-bold px-6"
+            className="h-14 px-10 bg-white border border-slate-200 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-slate-900 hover:border-slate-300 transition-all rounded-2xl shadow-sm italic"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleImport}
             disabled={!file || isImporting}
-            className="rounded-xl bg-slate-900 text-white hover:bg-slate-800 px-8 font-bold shadow-lg shadow-slate-200"
+            className="h-14 px-12 bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 disabled:opacity-20 flex items-center gap-4 rounded-2xl ml-6 italic transition-all active:scale-95"
           >
             {isImporting ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white mr-2" />
-                Importing...
-              </>
+              <div className="h-5 w-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
               "Start Import"
             )}
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

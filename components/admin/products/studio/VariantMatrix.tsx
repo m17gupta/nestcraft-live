@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
-import { Layers, Trash2 } from "lucide-react";
-import { SectionCard } from "./Common";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Edit, Package, RefreshCw, Trash, Zap } from "lucide-react";
 import { VariantRow } from "@/lib/admin-products/utils";
 
 interface VariantMatrixProps {
@@ -8,115 +10,105 @@ interface VariantMatrixProps {
   onVariantsChange: (variants: VariantRow[]) => void;
 }
 
-export function VariantMatrix({
+export const VariantMatrix: React.FC<VariantMatrixProps> = ({
   variants,
   onVariantsChange,
-}: VariantMatrixProps) {
-  if (variants.length === 0) return null;
+}) => {
+  const updateVariant = (id: string, field: keyof VariantRow, value: any) => {
+    const next = variants.map((v) =>
+      (v._id === id || v.sku === id) ? { ...v, [field]: value } : v
+    );
+    onVariantsChange(next);
+  };
+
+  const removeVariant = (id: string) => {
+     const next = variants.filter(v => v._id !== id && v.sku !== id);
+     onVariantsChange(next);
+  };
 
   return (
-    <SectionCard
-      icon={<Layers className="text-violet-500" size={16} />}
-      title="Generated Variants"
-    >
-      <div className="overflow-x-auto rounded-xl border border-slate-200">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-200">
-            <tr>
-              <th className="px-4 py-3">Variant Combination</th>
-              <th className="px-4 py-3">SKU</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3">Stock</th>
-              <th className="px-4 py-3 text-center">Status</th>
-              <th className="px-4 py-3 text-center"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 bg-white">
-            {variants.map((v, i) => (
-              <tr
-                key={v._id}
-                className={`hover:bg-slate-50/50 transition-all ${v.status === "inactive" ? "opacity-50" : ""}`}
-              >
-                <td className="px-4 py-2.5 text-[10px]">{v.title}</td>
-                <td className="px-4 py-2.5">
-                  <input
-                    value={v.sku}
-                    onChange={(e) => {
-                      const next = [...variants];
-                      next[i] = {
-                        ...v,
-                        sku: e.target.value.toUpperCase(),
-                      };
-                      onVariantsChange(next);
-                    }}
-                    disabled={v.status === "inactive"}
-                    className="compact-input py-1 px-2 text-[10px] font-mono w-28 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  />
-                </td>
-                <td className="px-4 py-2.5">
-                  <input
-                    type="number"
-                    value={v.price}
-                    onChange={(e) => {
-                      const next = [...variants];
-                      next[i] = { ...v, price: e.target.value };
-                      onVariantsChange(next);
-                    }}
-                    disabled={v.status === "inactive"}
-                    className="compact-input py-1 px-2 text-[10px] w-20 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  />
-                </td>
-                <td className="px-4 py-2.5">
-                  <input
-                    type="number"
-                    value={v.stock}
-                    onChange={(e) => {
-                      const next = [...variants];
-                      next[i] = { ...v, stock: e.target.value };
-                      onVariantsChange(next);
-                    }}
-                    disabled={v.status === "inactive"}
-                    className="compact-input py-1 px-2 text-[10px] w-16 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                  />
-                </td>
-                <td className="px-4 py-2.5 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = [...variants];
-                      next[i] = {
-                        ...v,
-                        status: v.status === "active" ? "inactive" : "active",
-                      };
-                      onVariantsChange(next);
-                    }}
-                    className={`px-3 py-1 rounded-md text-[9px] font-semibold uppercase tracking-wide transition-all ${
-                      v.status === "active"
-                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                    }`}
-                  >
-                    {v.status}
-                  </button>
-                </td>
-                <td className="px-4 py-2.5 text-center">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onVariantsChange(
-                        variants.filter((vt) => vt._id !== v._id),
-                      )
-                    }
-                    className="p-1.5 text-slate-300 hover:text-rose-500 transition-colors"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl italic">
+      <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+        <div className="flex items-center gap-5">
+          <div className="h-10 w-10 bg-primary/5 rounded-xl flex items-center justify-center text-primary shadow-inner">
+            <Zap size={18} strokeWidth={2.5} />
+          </div>
+          <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.3em] italic">Product Variant Matrix</h3>
+        </div>
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] italic">{variants.length} Variants Configured</span>
       </div>
-    </SectionCard>
+
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-slate-50/50 border-b border-slate-100">
+            <TableRow className="hover:bg-transparent border-none">
+              <TableHead className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 px-8 py-5 italic">Variant Details</TableHead>
+              <TableHead className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 italic">SKU Identifier</TableHead>
+              <TableHead className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 italic">Sales Price</TableHead>
+              <TableHead className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 italic">Stock Level</TableHead>
+              <TableHead className="text-right text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 px-8 italic">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {variants.length === 0 ? (
+              <TableRow className="border-none hover:bg-transparent">
+                <TableCell colSpan={5} className="h-64 text-center bg-slate-50/30">
+                   <div className="flex flex-col items-center gap-6 text-slate-200">
+                      <RefreshCw size={48} strokeWidth={2.5} className="animate-spin-slow" />
+                      <span className="text-[11px] font-black uppercase tracking-[0.5em]">Generate variant matrix to see entries</span>
+                   </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              variants.map((v, idx) => (
+                <TableRow key={v._id || v.sku || idx} className="border-slate-50 hover:bg-slate-50/50 transition-colors group italic">
+                  <TableCell className="px-8 py-5">
+                    <div className="flex flex-col">
+                       <span className="text-[13px] font-black text-slate-900 uppercase tracking-tight group-hover:text-primary transition-colors">{v.title}</span>
+                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">ID: {v._id?.slice(-8) || 'NEW-VARIANT'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <input 
+                      type="text"
+                      value={v.sku}
+                      onChange={(e) => updateVariant(v._id || v.sku || "", "sku", e.target.value)}
+                      className="w-full h-10 bg-white border border-slate-100 rounded-xl px-4 text-[11px] font-bold text-slate-600 focus:border-primary/30 outline-none shadow-inner"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="relative">
+                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[11px] font-black">$</span>
+                       <input 
+                         type="text"
+                         value={v.price}
+                         onChange={(e) => updateVariant(v._id || v.sku || "", "price", e.target.value)}
+                         className="w-full h-10 bg-white border border-slate-100 rounded-xl pl-8 pr-4 text-[11px] font-black text-primary focus:border-primary/30 outline-none shadow-inner"
+                       />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <input 
+                      type="text"
+                      value={v.stock}
+                      onChange={(e) => updateVariant(v._id || v.sku || "", "stock", e.target.value)}
+                      className="w-full h-10 bg-white border border-slate-100 rounded-xl px-4 text-[11px] font-black text-slate-900 focus:border-primary/30 outline-none shadow-inner"
+                    />
+                  </TableCell>
+                  <TableCell className="text-right px-8">
+                    <button 
+                      onClick={() => removeVariant(v._id || v.sku || "")}
+                      className="h-10 w-10 flex items-center justify-center bg-slate-50 border border-slate-100 text-slate-300 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all rounded-xl shadow-sm active:scale-95"
+                    >
+                       <Trash size={16} strokeWidth={2.5} />
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
-}
+};

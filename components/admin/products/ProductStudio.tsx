@@ -1,8 +1,18 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Eye, Package, Save } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  Package,
+  Save,
+  ShieldCheck,
+  Terminal,
+} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { RootState } from "@/lib/store/store";
 
 import {
   setProductFormField,
@@ -11,15 +21,13 @@ import {
   setCurrentProduct,
 } from "@/lib/store/products/productsSlices";
 import { saveProduct } from "@/lib/store/products/productsThunk";
-import { fetchCategories } from "@/lib/store/categories/categoriesThunk";
+import { fetchForms } from "@/lib/store/forms/formsThunk";
 
 import {
   VariantRow,
-  slugify,
   sanitizeKey,
   buildCombinationTitle,
   buildVariantCombinations,
-  readFileAsDataUrl,
   generateSKUWithBaseSKU,
 } from "@/lib/admin-products/utils";
 
@@ -29,79 +37,79 @@ import { VisualMedia } from "./studio/VisualMedia";
 import { OptionConfiguration } from "./studio/OptionConfiguration";
 import { VariantMatrix } from "./studio/VariantMatrix";
 import { PublicationSidebar } from "./studio/PublicationSidebar";
-import { useToast } from "@/hooks/useToast";
-import { Toast } from "./studio/Toast";
-import { AppDispatch, RootState } from "@/lib/store/store";
-import { useSelector } from "react-redux";
-import { useParams, useRouter } from "next/navigation";
 
 export function ProductStudio() {
   const router = useRouter();
-  const params: { id: string } = useParams();
-
-  const editId = params.id ? params.id : null;
+  const params = useParams();
+  const editId = (params.id as string) || null;
   const dispatch = useAppDispatch();
   const isEditing = Boolean(editId);
 
-  const onClose = () => {
-    router.back();
-  };
-
-  const { allCategories } = useSelector(
+  const { allCategories } = useAppSelector(
     (state: RootState) => state.adminCategories,
   );
-  const { allattributes } = useSelector(
+  const { allattributes } = useAppSelector(
     (state: RootState) => state.adminAttributes,
   );
-
   const {
     allProducts,
     currentProduct: form,
     saving,
     loading: productLoading,
-  } = useSelector((state: RootState) => state.adminProducts);
+  } = useAppSelector((state: RootState) => state.adminProducts);
+  const { allForms } = useAppSelector((state: RootState) => state.adminForms);
 
   const [loading, setLoading] = useState(true);
   const [galleryUrlDraft, setGalleryUrlDraft] = useState("");
   const [productSlug, setProductSlug] = useState("");
 
   const relatedProductCandidates = useMemo(
-    () => allProducts.filter((item: any) => item._id !== editId),
+    () => allProducts.filter((item: any) => item.id !== editId),
     [allProducts, editId],
   );
 
-  const { toast, showToast } = useToast();
+  console.log("relatedProductCandidates", relatedProductCandidates);
 
   // Initial Load
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       try {
-        if (isEditing && editId && allProducts.length > 0) {
-          const singleProduct = allProducts.find(
-            (item: any) => item._id === editId,
-          );
-          if (singleProduct) {
-            dispatch(setCurrentProduct(singleProduct));
-            setProductSlug(singleProduct.slug || "");
-          }
+        if (isEditing && editId) {
+          // Wait for products to be fetched before finding
         } else {
           dispatch(resetProductForm());
           setProductSlug("");
         }
+        dispatch(fetchForms());
       } catch (err) {
-        console.error("Failed to load initial data", err);
+        console.error("Product initialization failed", err);
+        toast.error("Initialization error: Could not connect to data hub.");
       } finally {
         setLoading(false);
       }
     };
     init();
-  }, [editId, allProducts, isEditing, dispatch]);
+  }, [editId, isEditing, dispatch]);
+
+  // Sync editId with form
+  useEffect(() => {
+    if (isEditing && editId && allProducts.length > 0) {
+      const singleProduct = allProducts.find((item: any) => item.id === editId);
+      if (singleProduct) {
+        dispatch(setCurrentProduct(singleProduct));
+        setProductSlug(singleProduct.slug || "");
+      }
+    }
+  }, [allProducts, editId, isEditing, dispatch]);
 
   const handleSave = async () => {
     if (!form) return;
-    if (!form.name.trim() || !form.sku.trim())
-      return showToast("Name and SKU required", "error");
+    if (!form.name.trim() || !form.sku.trim()) {
+      return toast.error(
+        "Required fields: Product Name and SKU are mandatory.",
+      );
+    }
 
     const payload = {
       ...form,
@@ -122,18 +130,22 @@ export function ProductStudio() {
       })),
     };
 
+    const tId = toast.loading("Saving product details...");
+
     try {
       const action: any = await dispatch(
         saveProduct({ id: editId || undefined, payload }),
       );
       if (saveProduct.fulfilled.match(action)) {
-        showToast(isEditing ? "Updated successfully" : "Created successfully");
-        setTimeout(() => onClose(), 1500);
+        toast.success(isEditing ? "Product updated" : "Product saved", {
+          id: tId,
+        });
+        setTimeout(() => router.push("/admin/products"), 1500);
       } else {
-        showToast(action.payload || "Failed to save", "error");
+        toast.error(action.payload || "Save failed", { id: tId });
       }
     } catch (e) {
-      showToast("An error occurred", "error");
+      toast.error("Network error detected", { id: tId });
     }
   };
 
@@ -164,7 +176,7 @@ export function ProductStudio() {
     });
 
     dispatch(setProductFormField({ field: "variants", value: nextVariants }));
-    showToast(`Generated ${nextVariants.length} variants`);
+    toast.info(`Matrix updated: ${nextVariants.length} variants generated`);
   };
 
   const toggleAttributeSet = (id: string) => {
@@ -199,21 +211,19 @@ export function ProductStudio() {
     dispatch(setProductFormField({ field: "variants", value: [] }));
   };
 
-  const toggleCategory = (slug: string) => {
+  const toggleCategory = (id: string) => {
     if (!form) return;
-    const exists = form.categoryIds.includes(slug);
+    const exists = form.categoryIds.includes(id);
     const nextIds = exists
-      ? form.categoryIds.filter((i: string) => i !== slug)
-      : [...form.categoryIds, slug];
+      ? form.categoryIds.filter((i: string) => i !== id)
+      : [...form.categoryIds, id];
 
     dispatch(setProductFormField({ field: "categoryIds", value: nextIds }));
 
-    if (exists && form.primaryCategoryId === slug) {
+    if (exists && form.primaryCategoryId === id) {
       dispatch(setProductFormField({ field: "primaryCategoryId", value: "" }));
     } else if (!exists && nextIds.length === 1) {
-      dispatch(
-        setProductFormField({ field: "primaryCategoryId", value: slug }),
-      );
+      dispatch(setProductFormField({ field: "primaryCategoryId", value: id }));
     }
   };
 
@@ -225,69 +235,73 @@ export function ProductStudio() {
     next[idx] = {
       ...opt,
       values: [...opt.values, opt.draftValue.trim()],
+      selectedValues: [...opt.selectedValues, opt.draftValue.trim()],
       draftValue: "",
     };
     dispatch(setProductFormField({ field: "options", value: next }));
   };
 
-  if (loading || productLoading || !form)
+  if (loading || productLoading || !form) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" />
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-6">
+        <div className="h-10 w-10 border-4 border-slate-100 border-t-primary rounded-full animate-spin shadow-xl shadow-primary/10" />
+        <span className="text-[11px] font-black uppercase tracking-[0.5em] text-slate-300 italic">
+          Initializing Management Hub...
+        </span>
       </div>
     );
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 space-y-4 animate-in fade-in duration-500 bg-slate-50/30 rounded-3xl border border-slate-100 shadow-2xl shadow-slate-200/50">
-      <Toast toast={toast} />
-
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-3">
+    <div className="space-y-12 pb-32 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      {/* Header Section */}
+      <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8 shadow-2xl shadow-slate-200/50 italic">
+        <div className="flex items-center gap-6">
           <button
-            onClick={onClose}
-            className="p-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-50 transition-all shadow-sm"
+            onClick={() => router.push("/admin/products")}
+            className="h-14 w-14 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-2xl text-slate-400 hover:text-primary hover:bg-primary/5 transition-all active:scale-90 shadow-sm"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={22} strokeWidth={2.5} />
           </button>
           <div>
-            <div className="text-lg font-bold text-slate-900 tracking-tight">
-              {isEditing ? "Edit Product" : "New Creation"}
-            </div>
-            <div className="flex items-center gap-1.5 text-slate-400">
-              <Package size={12} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">
-                {form.sku || "Generating Identity"}
-              </span>
+            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">
+              {isEditing ? "Update" : "Save"}{" "}
+              <span className="text-primary">Product</span>
+            </h1>
+            <div className="flex items-center gap-2 text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mt-1">
+              <Terminal size={14} strokeWidth={2.5} className="text-primary/40" />
+              {isEditing
+                ? `Modifying Serial: ${form.sku}`
+                : "Configuring New Product Entry"}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-5">
           <button
-            type="button"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50"
+            className="h-14 px-10 bg-white border border-slate-100 text-slate-400 font-black text-[11px] uppercase tracking-[0.2em] hover:text-slate-900 hover:border-slate-200 transition-all active:scale-95 rounded-2xl shadow-sm"
+            onClick={() => router.push("/admin/products")}
           >
-            <Eye size={14} />
-            Preview
+            Cancel
           </button>
           <button
-            onClick={handleSave}
+            className="h-14 px-12 bg-primary text-white font-black text-[11px] uppercase tracking-[0.2em] hover:bg-slate-900 transition-all active:scale-95 flex items-center gap-4 rounded-2xl shadow-2xl shadow-primary/30 italic"
             disabled={saving}
-            className="flex items-center gap-1.5 px-6 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-lg disabled:opacity-60"
+            onClick={handleSave}
           >
             {saving ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-400 border-t-white" />
+              <div className="h-5 w-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
-              <Save size={14} />
+              <Save size={20} strokeWidth={3} />
             )}
-            <span>{isEditing ? "Update" : "Launch"}</span>
+            {isEditing ? "Update Product" : "Save Product"}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pb-12">
-        {/* Main Column */}
-        <div className="lg:col-span-8 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Main Interface */}
+        <div className="lg:col-span-8 space-y-8">
           <GeneralInformation
             name={form.name}
             sku={form.sku}
@@ -362,7 +376,7 @@ export function ProductStudio() {
           />
         </div>
 
-        {/* Sidebar Column */}
+        {/* Tactical Control Sidebar */}
         <div className="lg:col-span-4">
           <PublicationSidebar
             status={form.status}
@@ -386,44 +400,11 @@ export function ProductStudio() {
                 }),
               )
             }
+            allForms={allForms}
+            formId={(form as any).formId || ""}
           />
         </div>
       </div>
-
-      <style jsx global>{`
-        .compact-input {
-          width: 100%;
-          padding: 8px 12px;
-          border-radius: 12px;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          color: #334155;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all 0.15s ease;
-        }
-        .compact-input:focus {
-          outline: none;
-          border-color: #94a3b8;
-          background: #f8fafc;
-          box-shadow: 0 0 0 3px rgba(226, 232, 240, 0.4);
-        }
-        .compact-input::placeholder {
-          color: #cbd5e1;
-          font-weight: 400;
-          font-size: 12px;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #f1f5f9;
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 }

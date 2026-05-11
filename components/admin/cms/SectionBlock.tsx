@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ContentItem } from "./ContentItem";
+import { ContentItem } from "@/components/admin/cms/ContentItem";
 import { 
   Plus, 
   Trash, 
@@ -13,7 +13,9 @@ import {
   ChevronRight,
   ChevronDown as ChevronDownIcon,
   Columns as ColumnsIcon,
-  GalleryHorizontal
+  Zap,
+  Maximize2,
+  Terminal,
 } from "lucide-react";
 import {
   Select,
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/lib/store/hooks";
 
 interface SectionBlockProps {
   section: any;
@@ -44,12 +47,12 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
   isFirst,
   isLast,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
+  const { config: brandConfig } = useAppSelector((state) => state.branding);
+  const defaultLang = brandConfig?.languages?.default || "en";
 
-  // Ensure columns exist and are initialized
   useEffect(() => {
     if (!section.columns || section.columns.length === 0) {
-      // Migrate from flat content to columns if exists
       const initialContent = section.content || [];
       onUpdate({ columns: [initialContent], content: [] });
     }
@@ -71,12 +74,10 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
     const newCols = [...currentCols];
 
     if (newCount > currentCols.length) {
-      // Add empty columns
       for (let i = currentCols.length; i < newCount; i++) {
         newCols.push([]);
       }
     } else if (newCount < currentCols.length) {
-      // Merge removed columns into the last remaining column
       const mergedContent = [...newCols[newCount - 1]];
       for (let i = newCount; i < currentCols.length; i++) {
         mergedContent.push(...currentCols[i]);
@@ -92,17 +93,23 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
     const newItem = {
       id: Math.random().toString(36).substr(2, 9),
       type,
-      ...(type === "heading" ? { level: "h2", text: "" } : {}),
-      ...(type === "paragraph" ? { text: "" } : {}),
-      ...(type === "image" ? { url: "", alt: "" } : {}),
-      ...(type === "button" ? { buttons: [{ id: Math.random().toString(36).substr(2, 9), label: "Button", link: "#", actionType: "link" }] } : {}),
-      ...(type === "list" ? { items: [""] } : {}),
+      ...(type === "heading" ? { level: "h2", text: { [defaultLang]: "New section heading" } } : {}),
+      ...(type === "paragraph" ? { text: { [defaultLang]: "" } } : {}),
+      ...(type === "image" ? { url: "", alt: { [defaultLang]: "" } } : {}),
+      ...(type === "button" ? { buttons: [{ id: Math.random().toString(36).substr(2, 9), label: { [defaultLang]: "Action button" }, link: "#", actionType: "link" }] } : {}),
+      ...(type === "list" ? { items: [{ [defaultLang]: "" }] } : {}),
       ...(type === "section" ? { layout: "grid-1", columns: [[]] } : {}),
-      ...(type === "carousel" ? { items: [{ id: Math.random().toString(36).substr(2, 9), adminTitle: "Slide 1", layout: "grid-1", columns: [[]] }] } : {}),
-      ...(type === "cta" ? { title: "", subtitle: "", description: "", buttonLabel: "", buttonLink: "" } : {}),
+      ...(type === "carousel" ? { items: [{ id: Math.random().toString(36).substr(2, 9), adminTitle: { [defaultLang]: "Slide item" }, layout: "grid-1", columns: [[]] }] } : {}),
+      ...(type === "cta" ? { 
+          title: { [defaultLang]: "" }, 
+          subtitle: { [defaultLang]: "" }, 
+          description: { [defaultLang]: "" }, 
+          buttonLabel: { [defaultLang]: "" }, 
+          buttonLink: "" 
+      } : {}),
       ...(type === "cards" ? { items: [] } : {}),
       ...(type === "features" ? { items: [] } : {}),
-      ...(type === "testimonial" ? { quote: "", author: "", role: "", avatar: "" } : {}),
+      ...(type === "testimonial" ? { quote: { [defaultLang]: "" }, author: { [defaultLang]: "" }, role: { [defaultLang]: "" }, avatar: "" } : {}),
     };
 
     const newCols = [...(section.columns || [[]])];
@@ -145,28 +152,28 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
   const totalItemCount = columns.reduce((acc: number, col: any[]) => acc + (col?.length || 0), 0);
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-4 space-y-4 relative group/section transition-all hover:border-slate-300 shadow-sm border-l-4 border-l-slate-900">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-1">
+    <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 space-y-6 relative group/section transition-all hover:border-primary/30 shadow-sm border-l-[6px] border-l-primary">
+      <div className="flex flex-wrap items-center justify-between gap-8 pb-6 border-b border-slate-50">
+        <div className="flex items-center gap-6 flex-1 min-w-[200px]">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-xl text-slate-400 hover:text-slate-900"
+            className="h-12 w-12 bg-slate-50 border border-slate-100 text-slate-400 hover:text-primary hover:bg-white transition-all rounded-2xl shadow-inner"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? <ChevronDownIcon size={18} /> : <ChevronRight size={18} />}
+            {isOpen ? <ChevronDownIcon size={20} strokeWidth={2.5} /> : <ChevronRight size={20} strokeWidth={2.5} />}
           </Button>
 
-          <div className="p-1.5 bg-slate-900 rounded-lg text-white">
-            <Layers size={14} />
+          <div className="p-3 bg-primary/5 border border-primary/10 text-primary rounded-xl">
+            <Layers size={20} strokeWidth={2.5} />
           </div>
           
           <div className="flex flex-col flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none">Section Block</span>
+            <div className="flex items-center gap-4 mb-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 leading-none italic">Layout Section</span>
               {!isOpen && totalItemCount > 0 && (
-                 <span className="px-1.5 py-0.5 rounded-md bg-slate-50 text-[10px] font-bold text-slate-500 border border-slate-100">
-                   {totalItemCount} item{totalItemCount !== 1 ? 's' : ''}
+                 <span className="px-3 py-1 bg-primary/5 text-[9px] font-black text-primary uppercase tracking-[0.2em] rounded-lg border border-primary/10 italic">
+                   {totalItemCount} Items Added
                  </span>
               )}
             </div>
@@ -174,36 +181,36 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
               <Input 
                 value={section.adminTitle || ""} 
                 onChange={(e) => onUpdate({ adminTitle: e.target.value })} 
-                placeholder="Section Display Title (Internal)..." 
-                className="h-7 text-xs font-bold border-none bg-transparent p-0 focus-visible:ring-0 text-slate-700" 
+                placeholder="SECTION TITLE..." 
+                className="h-12 bg-slate-50 border border-slate-100 text-[13px] font-bold text-slate-900 hover:border-primary/30 transition-all uppercase tracking-widest italic rounded-xl px-6 shadow-inner" 
               />
             ) : (
-              <span className="text-sm font-bold text-slate-700 truncate cursor-pointer" onClick={() => setIsOpen(true)}>
-                {section.adminTitle || "Content Wrapper"}
+              <span className="text-[15px] font-black text-slate-900 uppercase tracking-tight truncate cursor-pointer hover:text-primary transition-colors italic" onClick={() => setIsOpen(true)}>
+                {section.adminTitle || "Unnamed Section"}
               </span>
             )}
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-slate-50 rounded-xl border border-slate-100 p-0.5">
+        <div className="flex items-center gap-5">
+          <div className="flex items-center bg-slate-50 border border-slate-100 p-1.5 rounded-xl shadow-inner">
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white"
+              className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-white transition-all rounded-lg"
               onClick={onMoveUp}
               disabled={isFirst}
             >
-              <ChevronUp size={14} />
+              <ChevronUp size={18} strokeWidth={2.5} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white"
+              className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-white transition-all rounded-lg"
               onClick={onMoveDown}
               disabled={isLast}
             >
-              <ChevronDown size={14} />
+              <ChevronDown size={18} strokeWidth={2.5} />
             </Button>
           </div>
 
@@ -211,54 +218,54 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
             value={section.layout || "grid-1"}
             onValueChange={handleLayoutChange}
           >
-            <SelectTrigger className="w-[120px] h-8 text-[10px] font-bold rounded-lg border-slate-200 bg-white">
-              <LayoutGrid size={12} className="mr-2 text-slate-400" />
+            <SelectTrigger className="w-[160px] h-12 bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-900 uppercase tracking-widest rounded-xl focus:ring-2 focus:ring-primary/20 italic px-5 shadow-inner">
+              <LayoutGrid size={16} strokeWidth={2.5} className="mr-3 text-primary" />
               <SelectValue placeholder="Layout" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="grid-1">1 Column</SelectItem>
-              <SelectItem value="grid-2">2 Columns</SelectItem>
-              <SelectItem value="grid-3">3 Columns</SelectItem>
-              <SelectItem value="grid-4">4 Columns</SelectItem>
+            <SelectContent className="bg-white border-slate-100 text-slate-900 font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-2xl p-2 italic">
+              <SelectItem value="grid-1" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">01 Column</SelectItem>
+              <SelectItem value="grid-2" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">02 Columns</SelectItem>
+              <SelectItem value="grid-3" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">03 Columns</SelectItem>
+              <SelectItem value="grid-4" className="rounded-xl focus:bg-primary/5 focus:text-primary transition-colors cursor-pointer py-3">04 Columns</SelectItem>
             </SelectContent>
           </Select>
 
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50"
+            className="h-12 w-12 bg-white text-slate-300 hover:text-red-500 transition-all rounded-2xl border border-slate-100 hover:border-red-100 hover:bg-red-50 shadow-sm"
             onClick={onRemove}
           >
-            <Trash size={16} />
+            <Trash size={20} strokeWidth={2.5} />
           </Button>
         </div>
       </div>
 
       {isOpen && (
         <div className={cn(
-          "grid gap-6 animate-in fade-in duration-200",
+          "grid gap-6 animate-in fade-in duration-300",
           columns.length === 1 ? "grid-cols-1" : 
           columns.length === 2 ? "grid-cols-2" :
           columns.length === 3 ? "grid-cols-3" : "grid-cols-4"
         )}>
           {columns.map((col: any[], colIdx: number) => (
             <div key={colIdx} className={cn(
-              "space-y-4 pb-4",
-              columns.length > 1 ? "border-r border-slate-100 last:border-r-0 pr-4 last:pr-0" : ""
+              "space-y-6 pb-6 relative",
+              columns.length > 1 ? "border-r border-slate-50 last:border-r-0 pr-8 last:pr-0" : ""
             )}>
               {columns.length > 1 && (
-                <div className="flex items-center gap-2 mb-2 px-1">
-                   <ColumnsIcon size={12} className="text-slate-300" />
-                   <span className="text-[9px] font-black uppercase text-slate-300">Column {colIdx+1}</span>
+                <div className="flex items-center gap-4 mb-6 bg-slate-50 border border-slate-100 p-3 rounded-xl w-fit shadow-inner">
+                   <ColumnsIcon size={14} strokeWidth={2.5} className="text-primary" />
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Column {colIdx+1}</span>
                 </div>
               )}
               
-              <div className="space-y-4 min-h-[50px]">
+              <div className="space-y-4 min-h-[120px] bg-slate-50/50 p-4 border-2 border-slate-100 border-dashed rounded-[2rem] transition-colors hover:bg-slate-50">
                 {(col || []).map((item: any, idx: number) => (
                   <ContentItem
                     key={item.id}
                     item={item}
-                    onChange={(updates) => updateItem(item.id, colIdx, updates)}
+                    onChange={(updates: any) => updateItem(item.id, colIdx, updates)}
                     onRemove={() => removeItem(item.id, colIdx)}
                     onMoveUp={() => moveItem(idx, colIdx, "up")}
                     onMoveDown={() => moveItem(idx, colIdx, "down")}
@@ -268,53 +275,35 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
                 ))}
               </div>
 
-              <div className="flex flex-wrap items-center gap-1.5 pt-4 border-t border-slate-50 mt-4">
-                <button
-                  onClick={() => addContentElement("heading", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-slate-100 bg-white text-[9px] font-bold text-slate-400 hover:border-slate-300 hover:text-slate-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Heading
-                </button>
-                <button
-                  onClick={() => addContentElement("paragraph", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-slate-100 bg-white text-[9px] font-bold text-slate-400 hover:border-slate-300 hover:text-slate-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Text
-                </button>
-                <button
-                  onClick={() => addContentElement("image", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-slate-100 bg-white text-[9px] font-bold text-slate-400 hover:border-slate-300 hover:text-slate-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Image
-                </button>
-                <button
-                  onClick={() => addContentElement("section", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-blue-50 bg-white text-[9px] font-bold text-blue-400 hover:border-blue-300 hover:text-blue-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Sub
-                </button>
-                <button
-                  onClick={() => addContentElement("button", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-slate-100 bg-white text-[9px] font-bold text-slate-400 hover:border-slate-300 hover:text-slate-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Btn
-                </button>
-                <button
-                  onClick={() => addContentElement("carousel", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-purple-50 bg-white text-[9px] font-bold text-purple-400 hover:border-purple-300 hover:text-purple-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Carousel
-                </button>
-                <button
-                  onClick={() => addContentElement("cards", colIdx)}
-                  className="p-1 px-2 rounded-lg border border-slate-100 bg-white text-[9px] font-bold text-slate-400 hover:border-slate-300 hover:text-slate-900 transition-all flex items-center gap-1"
-                >
-                  <Plus size={10} /> Card
-                </button>
+              <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-slate-50 mt-6">
+                 {[
+                   { type: "heading", label: "Heading", icon: Plus },
+                   { type: "paragraph", label: "Body Text", icon: Plus },
+                   { type: "image", label: "Media Asset", icon: Plus },
+                   { type: "section", label: "Advanced Grid", icon: Maximize2 },
+                   { type: "button", label: "Interaction", icon: Zap },
+                   { type: "carousel", label: "Media Stream", icon: Plus },
+                   { type: "cards", label: "Dynamic Grid", icon: Plus },
+                 ].map((act) => (
+                    <button
+                      key={act.type}
+                      onClick={() => addContentElement(act.type, colIdx)}
+                      className="px-4 py-3 bg-white border border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:border-primary/40 hover:text-primary transition-all flex items-center gap-3 rounded-xl shadow-sm italic active:scale-95"
+                    >
+                      <act.icon size={14} strokeWidth={2.5} className="opacity-50" /> {act.label}
+                    </button>
+                 ))}
               </div>
             </div>
           ))}
         </div>
+      )}
+      
+      {!isOpen && (
+         <div className="flex items-center gap-4 opacity-30 italic">
+            <Terminal size={14} strokeWidth={2.5} className="text-primary" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Section minimized</span>
+         </div>
       )}
     </div>
   );

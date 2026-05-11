@@ -1,6 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { CategoryRecord } from "./categoriesSlices";
 
+const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 interface ApiError {
   message: string;
   status?: number;
@@ -20,9 +23,18 @@ export const fetchCategories = createAsyncThunk<
     const queryParams = new URLSearchParams();
     if (params) {
       if (params.type) queryParams.set("type", params.type);
-      if (params.includeCounts) queryParams.set("includeCounts", params.includeCounts);
+      if (params.includeCounts)
+        queryParams.set("includeCounts", params.includeCounts);
     }
-    const res = await fetch(`/api/ecommerce/categories?${queryParams.toString()}`);
+    const res = await fetch(
+      `${API_BASE_URL}/commerce/categories?${queryParams.toString()}`,
+      {
+        headers: {
+          "x-tenant-db": tenantHeader || "",
+        },
+        credentials: "include",
+      },
+    );
     const data = await res.json();
     if (!res.ok) {
       return rejectWithValue({
@@ -30,7 +42,7 @@ export const fetchCategories = createAsyncThunk<
         status: res.status,
       });
     }
-    return data;
+    return data.categories;
   } catch (error: any) {
     return rejectWithValue({
       message: error?.message || "Something went wrong",
@@ -44,9 +56,13 @@ export const createCategory = createAsyncThunk<
   { rejectValue: ApiError }
 >("categories/createCategory", async (payload, { rejectWithValue }) => {
   try {
-    const res = await fetch("/api/ecommerce/categories", {
+    const res = await fetch(`${API_BASE_URL}/commerce/categories`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
       body: JSON.stringify(payload),
     });
     const data = await res.json();
@@ -68,30 +84,31 @@ export const updateCategory = createAsyncThunk<
   CategoryRecord,
   { id: string; payload: any },
   { rejectValue: ApiError }
->(
-  "categories/updateCategory",
-  async ({ id, payload }, { rejectWithValue }) => {
-    try {
-      const res = await fetch(`/api/ecommerce/categories?id=${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        return rejectWithValue({
-          message: data?.error || "Failed to update category",
-          status: res.status,
-        });
-      }
-      return data;
-    } catch (error: any) {
+>("categories/updateCategory", async ({ id, payload }, { rejectWithValue }) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/commerce/categories/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
       return rejectWithValue({
-        message: error?.message || "Something went wrong",
+        message: data?.error || "Failed to update category",
+        status: res.status,
       });
     }
-  },
-);
+    return data;
+  } catch (error: any) {
+    return rejectWithValue({
+      message: error?.message || "Something went wrong",
+    });
+  }
+});
 
 export const deleteCategory = createAsyncThunk<
   string,
@@ -99,8 +116,13 @@ export const deleteCategory = createAsyncThunk<
   { rejectValue: ApiError }
 >("categories/deleteCategory", async (id, { rejectWithValue }) => {
   try {
-    const res = await fetch(`/api/ecommerce/categories?id=${id}`, {
+    const res = await fetch(`${API_BASE_URL}/commerce/categories/${id}`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
     });
     const data = await res.json();
     if (!res.ok) {
@@ -117,16 +139,19 @@ export const deleteCategory = createAsyncThunk<
   }
 });
 
-
 export const bulkImportCategories = createAsyncThunk<
   ApiResponse<any>,
   any[],
   { rejectValue: ApiError }
 >("categories/bulkImport", async (categories, { rejectWithValue }) => {
   try {
-    const res = await fetch("/api/ecommerce/categories/bulk", {
+    const res = await fetch(`${API_BASE_URL}/commerce/categories/bulk`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantHeader || "",
+      },
+      credentials: "include",
       body: JSON.stringify(categories),
     });
     const data = await res.json();
