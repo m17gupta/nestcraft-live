@@ -47,38 +47,31 @@ export const getPageData = cache(async (slug: string) => {
 });
 
 export const getSingleProduct = cache(async (id: string) => {
-  const db = await connectTenantDB();
-  const productColl = db.collection("products");
-
-  const matchStage: any = {};
-  if (isHex(id)) {
-    matchStage._id = new ObjectId(id);
-  } else {
-    matchStage.slug = id;
-  }
-
-  const products = await productColl
-    .aggregate([
-      {
-        $match: matchStage,
+  const tenantId = process.env.TENANT_DB_NAME || "kp_nestcraft";
+  try {
+    const res = await fetch(`${API_URL}/api/commerce/products/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantId,
       },
-      {
-        $lookup: {
-          from: "variants",
-          localField: "_id",
-          foreignField: "productId",
-          as: "variants",
-        },
-      },
+    });
 
-      
-    ])
-    .toArray();
-  if (products.length === 0) {
+    if (!res.ok) {
+      console.error(`Failed to fetch page data for slug: ${id}, status: ${res.status}`);
+      return null;
+    }
+
+    const json = await res.json();
+    // Support both wrapped { data: ... } and direct response formats
+    const data = json.data !== undefined ? json.data : json;
+    
+
+    return serialize(data);
+  } catch (error) {
+    console.error(`Error in getPageData for slug: ${id}`, error);
     return null;
   }
-
-  return serialize(products[0]);
 });
 
 export const getTenantRegistry = cache(async () => {
