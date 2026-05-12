@@ -22,52 +22,43 @@ import { setCurrentPages } from "@/lib/store/pages/pagesSlice";
 
 
 const AboutPage = () => {
-  const { user : nestCraftUser} = useSelector((state: RootState) => state.auth)
-  const {allPages,isAllPageFetched}= useSelector((state: RootState) => state.pages)
-  const pathname= usePathname()
-  const slug=pathname.split("/")?.[2]
-  console.log("slug--->",slug)
-  const dispatch = useDispatch()
-  //update the page
- useEffect(()=>{
-  if(allPages && 
-    allPages?.length>0 && 
-    slug){
-   const currentPage= allPages.find((item:Page)=>item.slug===slug)
-     if(currentPage){
-      dispatch(setCurrentPages(currentPage))
-     }
-  }
- },[allPages,slug])
- 
+  const { user: nestCraftUser } = useSelector((state: RootState) => state.auth);
+  const { allPages, currentPages } = useSelector((state: RootState) => state.pages);
+  const pathname = usePathname();
+  const slug = pathname.split("/")?.[2];
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (allPages && allPages.length > 0 && slug) {
+      const currentPage = allPages.find((item: Page) => item.slug === slug);
+      if (currentPage) {
+        dispatch(setCurrentPages(currentPage));
+      }
+    }
+  }, [allPages, slug, dispatch]);
+
+  const content = currentPages?.content || [];
+
+  const getSection = (content: any[], title: string) => {
+    return content?.find(
+      (s: any) => s.adminTitle?.toLowerCase() === title.toLowerCase()
+    );
+  };
+
   return (
     <>
-      {/* commentsS Plugin */}
       {nestCraftUser?.role == "admin" && <AnnotatorPlugin />}
-      {/* get all page from the database */}
       <GetAllPages />
 
       <div data-annotate-id="about-page-root" className="bg-background text-foreground">
-        {/* HERO */}
-        <AboutNestcraft />
-
-        {/* STATS */}
-        <StatsSection />
-
-        {/* STORY + MISSION */}
-        <OurStory />
-
-        {/* VALUES */}
-        <Difference />
-
-        {/* PROCESS */}
-        <OurProcess />
-
-        {/* MATERIALS / SHOWROOM */}
-        <DesignPhilosophy />
-
-        {/* ASSURANCES & CTA */}
-        <WhyChooseUs />
+        <AboutNestcraft section={getSection(content, "About NestCraft")} />
+        <StatsSection section={getSection(content, "Stats Section")} />
+        <OurStory section={getSection(content, "Our Story")} />
+        <Difference section={getSection(content, "Difference Section")} />
+        <OurProcess section={getSection(content, "Our Process")} />
+        <DesignPhilosophy section={getSection(content, "Design Philosophy")} />
+        <WhyChooseUs section={getSection(content, "Why Choose Us")} />
       </div>
     </>
   );

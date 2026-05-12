@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useMemo } from "react";
 import { categories as defaultCategories } from "@/data/products";

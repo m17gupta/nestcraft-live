@@ -1,3 +1,4 @@
+"use client";
 import React, { useMemo } from "react";
 import { defaultCollections, defaultCollectionProps } from "./collectionsData";
 import { motion } from "motion/react";

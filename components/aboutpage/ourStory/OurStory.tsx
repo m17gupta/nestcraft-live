@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
@@ -7,30 +8,40 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { CheckCircle2 } from "lucide-react";
 import { defaultOurStoryData } from "./ourStoryData";
 
-const OurStory = () => {
+const OurStory = ({ section }: { section?: any }) => {
   const pathname = usePathname();
   const { currentPages } = useAppSelector((state) => state.pages);
 
-  // 1. Language Detection
   const lang = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
     return segments[0] === "hi" ? "hi" : "en";
   }, [pathname]);
 
-  // 2. CMS Data Fetching
-  const section = useMemo(() => {
-    if (!currentPages) return null;
-    return currentPages.content?.find((s: any) => s?.adminTitle === "Our Story");
-  }, [currentPages]);
+  const currentSection = useMemo(() => {
+    return section || currentPages?.content?.find((s: any) => s?.adminTitle === "Our Story");
+  }, [section, currentPages]);
 
-  // 3. Data Merging
-  const p = (section as any)?.props || defaultOurStoryData.props;
-  const content = (section as any)?.content || defaultOurStoryData.content;
+  const getV = (field: any) => {
+    if (!field) return "";
+    const val = field.value !== undefined ? field.value : field;
+    if (val && typeof val === "object" && !Array.isArray(val)) return val[lang] || val.en || "";
+    return val || "";
+  };
 
-  // Localized values
-  const badge = p.badge?.[lang] || p.badge?.en || p.badge || "";
-  const heading = p.heading?.[lang] || p.heading?.en || p.heading || "";
-  const image = p.image || defaultOurStoryData.props.image;
+  const getL = (field: any) => {
+    if (!field) return [];
+    const val = field.value !== undefined ? field.value : field;
+    if (Array.isArray(val)) return val;
+    return [];
+  };
+
+  const p = currentSection?.props || defaultOurStoryData.props;
+  const items = currentSection?.content || defaultOurStoryData.content;
+
+  const badge = getV(p.badge);
+  const heading = getV(p.heading);
+  const image = getV(p.image) || defaultOurStoryData.props.image;
+  const paragraphs = getL(p.paragraphs);
 
   return (
     <section
@@ -39,7 +50,6 @@ const OurStory = () => {
     >
       <div className="mx-auto max-w-7xl px-[5%] py-24">
         <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr]">
-          {/* Image Column */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -53,7 +63,6 @@ const OurStory = () => {
             />
           </motion.div>
 
-          {/* Content Column */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -67,33 +76,27 @@ const OurStory = () => {
             </h2>
 
             <div className="mt-8 space-y-6">
-              {p.paragraphs?.map((para: any, idx: number) => (
+              {paragraphs?.map((para: any, idx: number) => (
                 <p
                   key={idx}
                   className="text-[16px] font-medium leading-8 text-white/70 sm:text-[17px]"
                 >
-                  {para?.[lang] || para?.en || para || ""}
+                  {getV(para)}
                 </p>
               ))}
             </div>
 
             <div className="mt-10 grid gap-5">
-              {content.map((item: any) => (
+              {items.map((item: any, idx: number) => (
                 <div
-                  key={item.id}
+                  key={item.id || idx}
                   className="flex items-center gap-4 group"
                 >
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/10 transition-colors group-hover:border-secondary/40">
                     <CheckCircle2 className="text-secondary" size={16} />
                   </div>
                   <span className="text-[15px] font-bold text-white/90">
-                    {item.props?.text?.[lang] ||
-                      item.props?.text?.en ||
-                      item.props?.text ||
-                      item.text?.[lang] ||
-                      item.text?.en ||
-                      item.text ||
-                      ""}
+                    {getV(item.props?.text) || item.text || ""}
                   </span>
                 </div>
               ))}

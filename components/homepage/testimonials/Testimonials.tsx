@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useState, useRef, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";

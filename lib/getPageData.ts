@@ -5,6 +5,7 @@ import { isHex } from "@/app/api/ecommerce/categories/util";
 
 
 function serialize(obj: any): any {
+  if (obj === null || obj === undefined) return null;
   return JSON.parse(JSON.stringify(obj, (_, value) => {
     if (value instanceof ObjectId) {
       return value.toString();
@@ -14,13 +15,35 @@ function serialize(obj: any): any {
 }
 
 
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const getPageData = cache(async (slug: string) => {
-  const db = await connectTenantDB();
-  const page = await db.collection("pages").findOne({ slug });
- if (!page) {
+  const tenantId = process.env.TENANT_DB_NAME || "kp_nestcraft";
+
+  try {
+    const res = await fetch(`${API_URL}/api/cms/pages?slug=${slug}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-tenant-db": tenantId,
+      },
+    });
+
+    if (!res.ok) {
+      console.error(`Failed to fetch page data for slug: ${slug}, status: ${res.status}`);
+      return null;
+    }
+
+    const json = await res.json();
+    // Support both wrapped { data: ... } and direct response formats
+    const data = json.data !== undefined ? json.data : json;
+    
+
+    return serialize(data);
+  } catch (error) {
+    console.error(`Error in getPageData for slug: ${slug}`, error);
     return null;
   }
-  return serialize(page);
 });
 
 export const getSingleProduct = cache(async (id: string) => {
@@ -68,21 +91,23 @@ export const getTenantRegistry = cache(async () => {
 });
 
 export const getBusinessBlueprint = cache(async () => {
-  const tenantHeader = process.env.NEXT_PUBLIC_TENANT_ID;
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+    const tenantId = process.env.TENANT_DB_NAME || "kp_nestcraft";
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/platform/business-blueprint`,
+      `${API_URL}/api/cms/business-blueprint`,
       {
         headers: {
-          "x-tenant-db": tenantHeader || "",
+          'Content-Type': 'application/json',
+          "x-tenant-db": tenantId || "kp_nestcraft",
         },
         credentials: "include",
       },
     );
-    const data = await response.json();
-    return serialize(data.data);
+    const json = await response.json();
+    const data = json.data !== undefined ? json.data : json;
+    return serialize(data);
   } catch (error) {
     console.error("Error fetching business blueprint:", error);
     return null;

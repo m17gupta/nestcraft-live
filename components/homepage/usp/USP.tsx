@@ -1,3 +1,4 @@
+"use client";
 import { RefreshCcw, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";

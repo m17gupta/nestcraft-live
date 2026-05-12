@@ -1,3 +1,4 @@
+"use client";
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
 import { Link } from "@/lib/router";

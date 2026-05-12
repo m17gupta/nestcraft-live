@@ -11,12 +11,22 @@ export default function ThemeInitializer() {
   const cssVariables = useMemo(() => {
     if (!businessBlueprint) return "";
 
-    const { public: themeConfig } = businessBlueprint.payload.brandAssets || {};
+    // Handle both nested and flattened structures
+    const payload = businessBlueprint.payload || businessBlueprint;
+    const brandAssets = payload?.brandAssets;
+    
+    if (!brandAssets) {
+      console.warn("ThemeInitializer: brandAssets not found in businessBlueprint", businessBlueprint);
+      return "";
+    }
+
+    const themeConfig = brandAssets.public || brandAssets;
     const { colors, typography } = themeConfig || {};
 
-    console.log(colors, typography);
-
-    if (!colors || !typography) return "";
+    if (!colors || !typography) {
+      console.warn("ThemeInitializer: colors or typography missing", { colors, typography });
+      return "";
+    }
 
     // Generate @font-face for custom fonts
     const fontFaces = typography?.customFonts
@@ -38,25 +48,25 @@ export default function ThemeInitializer() {
       
       :root {
         /* UI Matrix Core Variables */
-        --primary: ${colors.core.primary};
-        --secondary: ${colors.core.secondary};
-        --accent: ${colors.core.accent};
-        --background: ${colors.core.background};
-        --surface: ${colors.core.surface};
-        --text: ${colors.core.text};
+        --primary: ${colors.core?.primary || '#000000'};
+        --secondary: ${colors.core?.secondary || '#000000'};
+        --accent: ${colors.core?.accent || '#000000'};
+        --background: ${colors.core?.background || '#ffffff'};
+        --surface: ${colors.core?.surface || '#ffffff'};
+        --text: ${colors.core?.text || '#000000'};
         
         /* Button Tactical Variables */
-        --btn-primary-bg: ${colors.buttons.primary};
-        --btn-primary-text: ${colors.buttons.primaryText};
-        --btn-secondary-bg: ${colors.buttons.secondary};
-        --btn-secondary-text: ${colors.buttons.secondaryText};
+        --btn-primary-bg: ${colors.buttons?.primary || '#000000'};
+        --btn-primary-text: ${colors.buttons?.primaryText || '#ffffff'};
+        --btn-secondary-bg: ${colors.buttons?.secondary || '#ffffff'};
+        --btn-secondary-text: ${colors.buttons?.secondaryText || '#000000'};
         
         /* Typography Engine Variables */
-        --font-main: ${typography.bodyFont};
-        --font-heading: ${typography.headingFont};
+        --font-main: ${typography?.bodyFont || 'sans-serif'};
+        --font-heading: ${typography?.headingFont || 'sans-serif'};
 
         /* Overrides for Nestcraft Specific Variables if any */
-        --nest-primary: ${colors.core.primary};
+        --nest-primary: ${colors.core?.primary || '#000000'};
       }
       
       /* Global Application Overrides */

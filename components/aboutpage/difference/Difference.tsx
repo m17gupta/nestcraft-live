@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
@@ -14,30 +15,32 @@ const iconMap: any = {
   Sparkles,
 };
 
-const Difference = () => {
+const Difference = ({ section }: { section?: any }) => {
   const pathname = usePathname();
   const { currentPages } = useAppSelector((state) => state.pages);
 
-  // 1. Language Detection
   const lang = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
     return segments[0] === "hi" ? "hi" : "en";
   }, [pathname]);
 
-  // 2. CMS Data Fetching
-  const section = useMemo(() => {
-    if (!currentPages) return null;
-    return currentPages.content?.find((s: any) => s?.adminTitle === "Difference Section");
-  }, [currentPages]);
+  const currentSection = useMemo(() => {
+    return section || currentPages?.content?.find((s: any) => s?.adminTitle === "Difference Section");
+  }, [section, currentPages]);
 
-  // 3. Data Merging
-  const p = (section as any)?.props || defaultDifferenceData.props;
-  const content = (section as any)?.content || defaultDifferenceData.content;
+  const getV = (field: any) => {
+    if (!field) return "";
+    const val = field.value !== undefined ? field.value : field;
+    if (val && typeof val === "object" && !Array.isArray(val)) return val[lang] || val.en || "";
+    return val || "";
+  };
 
-  // Localized values
-  const badge = p.badge?.[lang] || p.badge?.en || p.badge || "";
-  const heading = p.heading?.[lang] || p.heading?.en || p.heading || "";
-  const subheading = p.subheading?.[lang] || p.subheading?.en || p.subheading || "";
+  const p = currentSection?.props || defaultDifferenceData.props;
+  const items = currentSection?.content || defaultDifferenceData.content;
+
+  const badge = getV(p.badge);
+  const heading = getV(p.heading);
+  const subheading = getV(p.subheading);
 
   return (
     <section
@@ -75,11 +78,11 @@ const Difference = () => {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {content.map((item: any, idx: number) => {
-            const Icon = iconMap[item.props?.icon || item.icon] || Sparkles;
+          {items.map((item: any, idx: number) => {
+            const Icon = iconMap[getV(item.props?.icon) || item.icon] || Sparkles;
             return (
               <motion.div
-                key={item.id}
+                key={item.id || idx}
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -90,22 +93,10 @@ const Difference = () => {
                   <Icon className="text-secondary" size={28} />
                 </div>
                 <h3 className="text-[20px] font-bold tracking-tight text-white">
-                  {item.props?.title?.[lang] ||
-                    item.props?.title?.en ||
-                    item.props?.title ||
-                    item.title?.[lang] ||
-                    item.title?.en ||
-                    item.title ||
-                    ""}
+                  {getV(item.props?.title) || item.title || ""}
                 </h3>
                 <p className="mt-4 text-[14px] font-medium leading-7 text-white/50">
-                  {item.props?.description?.[lang] ||
-                    item.props?.description?.en ||
-                    item.props?.description ||
-                    item.desc?.[lang] ||
-                    item.desc?.en ||
-                    item.desc ||
-                    ""}
+                  {getV(item.props?.description) || item.desc || ""}
                 </p>
               </motion.div>
             );

@@ -1,5 +1,28 @@
-import AboutPage from '@/components/pages/AboutPage';
+import AboutPageServer from '@/components/pages/AboutPageServer';
+import { getPageData } from '@/lib/getPageData';
+import { getAuthUser } from '@/lib/getSingleUser';
+import { cookies } from 'next/headers';
+import { Metadata } from 'next';
 
-export default function Page() {
-  return <AboutPage />;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const data = await getPageData("about");
+
+  return {
+    title: data?.metaTitle?.[locale] || data?.metaTitle?.en || "About Us | NestCraft",
+    description: data?.metaDescription?.[locale] || data?.metaDescription?.en || "Learn more about NestCraft craftsmanship.",
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  const [data, user] = await Promise.all([
+    getPageData("about"),
+    token ? getAuthUser(token).catch(() => null) : Promise.resolve(null),
+  ]);
+
+  return <AboutPageServer data={data} user={user} />;
 }

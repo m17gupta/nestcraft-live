@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
@@ -6,40 +7,35 @@ import { usePathname } from "next/navigation";
 import { useAppSelector } from "@/lib/store/hooks";
 import { defaultAboutNestcraftData } from "./aboutNestcraftData";
 
-const AboutNestcraft = () => {
+const AboutNestcraft = ({ section }: { section?: any }) => {
   const pathname = usePathname();
   const { currentPages } = useAppSelector((state) => state.pages);
 
-  // 1. Language Detection
   const lang = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
     return segments[0] === "hi" ? "hi" : "en";
   }, [pathname]);
 
-  // 2. CMS Data Fetching
-  const section = useMemo(() => {
-    if (!currentPages) return null;
-    // We assume the adminTitle in CMS is "About Hero" or something similar.
-    // Following the pattern from pageconstruction.md
-    return currentPages.content?.find((s: any) => s?.adminTitle === "About NestCraft");
-  }, [currentPages]);
+  const currentSection = useMemo(() => {
+    return section || currentPages?.content?.find((s: any) => s?.adminTitle === "About NestCraft");
+  }, [section, currentPages]);
 
-  // 3. Data Merging
-  const { p, content } = useMemo(() => {
-    return {
-      p: (section as any)?.props || defaultAboutNestcraftData.props,
-      content: (section as any)?.content || defaultAboutNestcraftData.content,
-    };
-  }, [section]);
+  const getV = (field: any) => {
+    if (!field) return "";
+    const val = field.value !== undefined ? field.value : field;
+    if (val && typeof val === "object" && !Array.isArray(val)) return val[lang] || val.en || "";
+    return val || "";
+  };
 
+  const p = currentSection?.props || defaultAboutNestcraftData.props;
+  const items = currentSection?.content || defaultAboutNestcraftData.content;
 
-  // Localized values
-  const badge = p.badge?.[lang] || p.badge?.en || p.badge || "";
-  const heading = p.heading?.[lang] || p.heading?.en || p.heading || "";
-  const description = p.description?.[lang] || p.description?.en || p.description || "";
-  const primaryBtn = p.primaryButton?.[lang] || p.primaryButton?.en || p.primaryButton || "";
-  const secondaryBtn = p.secondaryButton?.[lang] || p.secondaryButton?.en || p.secondaryButton || "";
-  const bgImage = p.backgroundImage || defaultAboutNestcraftData.props.backgroundImage;
+  const badge = getV(p.badge);
+  const heading = getV(p.heading);
+  const description = getV(p.description);
+  const primaryBtn = getV(p.primaryButton);
+  const secondaryBtn = getV(p.secondaryButton);
+  const bgImage = getV(p.backgroundImage) || defaultAboutNestcraftData.props.backgroundImage;
 
   return (
     <section
@@ -115,7 +111,7 @@ const AboutNestcraft = () => {
           transition={{ delay: 0.18 }}
           className="grid gap-4 sm:grid-cols-2"
         >
-          {content?.map((item: any, idx: number) => (
+          {items?.map((item: any, idx: number) => (
             <div
               key={item.id || idx}
               className={`overflow-hidden rounded-[26px] border border-white/10 bg-white/10 backdrop-blur-md ${
@@ -123,16 +119,8 @@ const AboutNestcraft = () => {
               }`}
             >
               <img
-                src={item.props?.image || item.image}
-                alt={
-                  item.props?.alt?.[lang] ||
-                  item.props?.alt?.en ||
-                  item.props?.alt ||
-                  item.alt?.[lang] ||
-                  item.alt?.en ||
-                  item.alt ||
-                  "NestCraft interior"
-                }
+                src={getV(item.props?.image) || item.image}
+                alt={getV(item.props?.alt) || item.alt || "NestCraft interior"}
                 className="h-[240px] w-full object-cover"
               />
             </div>

@@ -1,3 +1,4 @@
+"use client";
 import React, { useMemo } from "react";
 import { Hammer, Package, PenTool } from "lucide-react";
 import { motion } from "motion/react";

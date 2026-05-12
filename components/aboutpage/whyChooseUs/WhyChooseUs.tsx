@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import React, { useMemo } from "react";
 import { motion } from "motion/react";
@@ -14,42 +15,42 @@ const iconMap: any = {
   Ruler,
 };
 
-const WhyChooseUs = () => {
+const WhyChooseUs = ({ section }: { section?: any }) => {
   const pathname = usePathname();
   const { currentPages } = useAppSelector((state) => state.pages);
 
-  // 1. Language Detection
   const lang = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
     return segments[0] === "hi" ? "hi" : "en";
   }, [pathname]);
 
-  // 2. CMS Data Fetching
-  const section = useMemo(() => {
-    if (!currentPages) return null;
-    return currentPages.content?.find((s: any) => s?.adminTitle === "Why Choose Us");
-  }, [currentPages]);
+  const currentSection = useMemo(() => {
+    return section || currentPages?.content?.find((s: any) => s?.adminTitle === "Why Choose Us");
+  }, [section, currentPages]);
 
+  const getV = (field: any) => {
+    if (!field) return "";
+    const val = field.value !== undefined ? field.value : field;
+    if (val && typeof val === "object" && !Array.isArray(val)) return val[lang] || val.en || "";
+    return val || "";
+  };
 
-  // 3. Data Merging
-  const p = (section as any)?.props || defaultWhyChooseUsData.props;
-  const content = (section as any)?.content || defaultWhyChooseUsData.content;
+  const p = currentSection?.props || defaultWhyChooseUsData.props;
+  const items = currentSection?.content || defaultWhyChooseUsData.content;
 
-  // Localized values
-  const badge = p.badge?.[lang] || p.badge?.en || p.badge || "";
-  const heading = p.heading?.[lang] || p.heading?.en || p.heading || "";
-  const ctaBadge = p.ctaBadge?.[lang] || p.ctaBadge?.en || p.ctaBadge || "";
-  const ctaHeading = p.ctaHeading?.[lang] || p.ctaHeading?.en || p.ctaHeading || "";
-  const ctaDesc = p.ctaDescription?.[lang] || p.ctaDescription?.en || p.ctaDescription || "";
-  const primaryBtn = p.primaryButton?.[lang] || p.primaryButton?.en || p.primaryButton || "";
-  const secondaryBtn = p.secondaryButton?.[lang] || p.secondaryButton?.en || p.secondaryButton || "";
+  const badge = getV(p.badge);
+  const heading = getV(p.heading);
+  const ctaBadge = getV(p.ctaBadge);
+  const ctaHeading = getV(p.ctaHeading);
+  const ctaDesc = getV(p.ctaDescription);
+  const primaryBtn = getV(p.primaryButton);
+  const secondaryBtn = getV(p.secondaryButton);
 
   return (
     <section
       data-annotate-id="about-assurances-section"
       className="bg-[#06130B] text-white"
     >
-      {/* Assurances Grid */}
       <div className="mx-auto max-w-7xl px-[5%] py-24">
         <div className="mb-14 text-center">
           <motion.p
@@ -72,11 +73,11 @@ const WhyChooseUs = () => {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {content.map((item: any, idx: number) => {
-            const Icon = iconMap[item.props?.icon || item.icon] || ShieldCheck;
+          {items.map((item: any, idx: number) => {
+            const Icon = iconMap[getV(item.props?.icon) || item.icon] || ShieldCheck;
             return (
               <motion.div
-                key={item.id}
+                key={item.id || idx}
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -87,22 +88,10 @@ const WhyChooseUs = () => {
                   <Icon className="text-secondary" size={26} />
                 </div>
                 <h3 className="text-[18px] font-bold tracking-tight text-white">
-                  {item.props?.title?.[lang] ||
-                    item.props?.title?.en ||
-                    item.props?.title ||
-                    item.title?.[lang] ||
-                    item.title?.en ||
-                    item.title ||
-                    ""}
+                  {getV(item.props?.title) || item.title || ""}
                 </h3>
                 <p className="mt-4 text-[14px] font-medium leading-7 text-white/40">
-                  {item.props?.description?.[lang] ||
-                    item.props?.description?.en ||
-                    item.props?.description ||
-                    item.desc?.[lang] ||
-                    item.desc?.en ||
-                    item.desc ||
-                    ""}
+                  {getV(item.props?.description) || item.desc || ""}
                 </p>
               </motion.div>
             );
